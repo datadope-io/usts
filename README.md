@@ -1,10 +1,22 @@
-# USTS ( Unevently Spaced Time Series )
 
-Unevenly spaced time series library for Go and other time/slots/window helpers to deal with Unevenly spaced time events
-This library ia a partial Golang port for the python traces library , with a few time event handling additions.
+<p align="center">
+<h1 align="center">USTS  ( Unevently Spaced Time Series ) </h1>
+<p align="center">Unevenly spaced time series library for Go and other time/slots/window helpers to deal with Unevenly spaced time events
+This library ia a partial Golang port for the python traces library , with a few time event handling additions.)</p>
+</p>
+<p align="center">
+
+<a href="https://goreportcard.com/report/datadope-io/usts"><img src="https://goreportcard.com/badge/datadope-io/usts" alt="Go Report Card"></a>
+<a href="https://github.com/datadope-io/usts/releases/latest"><img src="https://img.shields.io/badge/version-0.0.0-blue.svg" alt="Release Version"></a>
+<a href="https://pkg.go.dev/github.com/datadope-io/usts"><img src="https://godoc.org/github.com/datadope-io/usts?status.svg" alt="GoDoc"></a>
+<a href="LICENSE"><img src="https://img.shields.io/github/license/datadope-io/usts.svg" alt="License"></a>
+</p>
+
+# About  Unevently Spaced Time Series 
+
+You could find more info about this kind of time series in the following links
 
 * https://github.com/datascopeanalytics/traces
-
 * https://en.wikipedia.org/wiki/Unevenly_spaced_time_series
 * https://traces.readthedocs.io/en/latest/
 
