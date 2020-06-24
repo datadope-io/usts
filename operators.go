@@ -79,6 +79,9 @@ func unique(in []time.Time) []time.Time {
 	return out
 }
 
+// And Logical AND from this TimeSerie with the other TimeSerie the resulting
+// TimeSerie will have the same time points in both previous series (max will be N+M if any repeated time)
+// computing logical AND : this is `output[t] = x[t1] AND y[t1]` if no value in y[t1] it gets the previous value
 func (uts *USTimeSerie) And(other *USTimeSerie) (*USTimeSerie, error) {
 
 	var res *USTimeSerie
@@ -111,7 +114,7 @@ func (uts *USTimeSerie) And(other *USTimeSerie) (*USTimeSerie, error) {
 
 		v1, _ := uts.Get(t)
 		v2, _ := other.Get(t)
-		ilog.Debugf("computing value for time %s [ %+v AND %+v ]", t, v1, v2)
+		ilog.Debugf(">>>>USTS DEBUG [USTimeSerie:And]:computing value for time %s [ %+v AND %+v ]", t, v1, v2)
 		result := (v1.(bool) && v2.(bool))
 		res.Add(t, result)
 
@@ -119,6 +122,9 @@ func (uts *USTimeSerie) And(other *USTimeSerie) (*USTimeSerie, error) {
 	return res, nil
 }
 
+// Or Logical OR from this TimeSerie with the other TimeSerie the resulting
+// TimeSerie will have the same time points in both previous series (max will be N+M if any repeated time)
+// computing logical OR : this is `output[t] = x[t1] OR y[t1]` if no value in y[t1] it gets the previous value
 func (uts *USTimeSerie) Or(other *USTimeSerie) (*USTimeSerie, error) {
 	var res *USTimeSerie
 
@@ -150,7 +156,7 @@ func (uts *USTimeSerie) Or(other *USTimeSerie) (*USTimeSerie, error) {
 
 		v1, _ := uts.Get(t)
 		v2, _ := other.Get(t)
-		ilog.Debugf("computing value for time %s [ %+v AND %+v ]", t, v1, v2)
+		ilog.Debugf(">>>>USTS DEBUG [USTimeSerie:Or]:computing value for time %s [ %+v AND %+v ]", t, v1, v2)
 		result := (v1.(bool) || v2.(bool))
 		res.Add(t, result)
 
@@ -158,6 +164,9 @@ func (uts *USTimeSerie) Or(other *USTimeSerie) (*USTimeSerie, error) {
 	return res, nil
 }
 
+// Xor Logical XOR from this TimeSerie with the other TimeSerie the resulting
+// TimeSerie will have the same time points in both previous series (max will be N+M if any repeated time)
+// computing logical XOR : this is `output[t] = x[t1] XOR y[t1]` if no value in y[t1] it gets the previous value
 func (uts *USTimeSerie) Xor(other *USTimeSerie) (*USTimeSerie, error) {
 	var res *USTimeSerie
 
@@ -195,7 +204,7 @@ func (uts *USTimeSerie) Xor(other *USTimeSerie) (*USTimeSerie, error) {
 
 		v1, _ := uts.Get(t)
 		v2, _ := other.Get(t)
-		ilog.Debugf("computing value for time %s [ %+v XOR %+v ]", t, v1, v2)
+		ilog.Debugf(">>>>USTS DEBUG [USTimeSerie:Xor]:computing value for time %s [ %+v XOR %+v ]", t, v1, v2)
 		result := false
 		if v1.(bool) == v2.(bool) {
 			result = true
@@ -206,6 +215,8 @@ func (uts *USTimeSerie) Xor(other *USTimeSerie) (*USTimeSerie, error) {
 	return res, nil
 }
 
+// Not Logical negation from this TimeSerie. The resulting TimeSerie will have the same time points
+// computing logical  negation : this is `output[t] = NOT x[t1]`
 func (uts *USTimeSerie) Not() (*USTimeSerie, error) {
 
 	var res *USTimeSerie
@@ -223,11 +234,17 @@ func (uts *USTimeSerie) Not() (*USTimeSerie, error) {
 		val := uts.m[t]
 		result := !val.(bool)
 		res.Add(t, result)
-		ilog.Debugf("computing value for time %s [ ! %+v ]", t, val)
+		ilog.Debugf(">>>>USTS DEBUG [USTimeSerie:Not]:computing value for time %s [ ! %+v ]", t, val)
 	}
 	return res, nil
 }
 
+// Combine merges this TimeSerie with other , The resulting TimeSerie will have the
+// same time points in both previous series (max will be N+M if any repeated time)
+// no logical operations done, it only merges data exept on time concidence where logical OR will be placed.
+// `output[t1] = x[t1] (if not exist y[t1])`
+// `output[t2] = y[t2] (if not exist x[t2])`
+// `output[t3] = x[t3] OR y[t3] ( if both series has values in t3)`
 func (uts *USTimeSerie) Combine(other *USTimeSerie) (*USTimeSerie, error) {
 	var res *USTimeSerie
 
@@ -244,7 +261,7 @@ func (uts *USTimeSerie) Combine(other *USTimeSerie) (*USTimeSerie, error) {
 
 		v1, ok1 := uts.GetExact(t)
 		v2, ok2 := other.GetExact(t)
-		ilog.Debugf("computing value for time %s [ %+v COMBINED %+v ]", t, v1, v2)
+		ilog.Debugf(">>>>USTS DEBUG:computing value for time %s [ %+v COMBINED %+v ]", t, v1, v2)
 		var result interface{}
 		switch {
 		case ok1 && ok2:
@@ -260,22 +277,22 @@ func (uts *USTimeSerie) Combine(other *USTimeSerie) (*USTimeSerie, error) {
 	return res, nil
 }
 
-func (uts *USTimeSerie) Multiply(other *USTimeSerie) {
+// func (uts *USTimeSerie) Multiply(other *USTimeSerie) {
 
-}
+// }
 
-func (uts *USTimeSerie) Difference(other *USTimeSerie) {
+// func (uts *USTimeSerie) Difference(other *USTimeSerie) {
 
-}
+// }
 
-func (uts *USTimeSerie) Mean(start time.Time, end time.Time, mask *USTimeSerie, interpolate InterPolateOps) {
+// func (uts *USTimeSerie) Mean(start time.Time, end time.Time, mask *USTimeSerie, interpolate InterPolateOps) {
 
-}
+// }
 
-func (uts *USTimeSerie) MonvingAverage(samplPeriod time.Duration, winSize time.Duration, start time.Time, end time.Time) {
+// func (uts *USTimeSerie) MonvingAverage(samplPeriod time.Duration, winSize time.Duration, start time.Time, end time.Time) {
 
-}
+// }
 
-func (uts *USTimeSerie) Resample(period time.Duration) {
+// func (uts *USTimeSerie) Resample(period time.Duration) {
 
-}
+// }

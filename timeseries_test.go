@@ -549,6 +549,32 @@ func ExampleBatchDelete() {
 	// [3] TIME: 2018-10-18 08:37:01 +0000 UTC | VALUE: 2018
 }
 
+func ExampleBatchDelete2() {
+	ts := NewUSTimeSerie(0)
+
+	// Insert example records:
+	ts.Add(time.Date(1995, 10, 18, 8, 37, 1, 0, time.UTC), "1995")
+	ts.Add(time.Date(1996, 10, 18, 8, 37, 1, 0, time.UTC), "1996")
+	ts.Add(time.Date(1997, 10, 18, 8, 37, 1, 0, time.UTC), "1997")
+	ts.Add(time.Date(1998, 10, 18, 8, 37, 1, 0, time.UTC), "1998")
+	ts.Add(time.Date(1999, 10, 18, 8, 37, 1, 0, time.UTC), "1999")
+
+	t0 := time.Date(1996, 10, 18, 8, 37, 1, 0, time.UTC)
+	t1 := time.Date(1998, 10, 18, 8, 37, 1, 0, time.UTC)
+
+	n, err := ts.BatchDelete(t0, t1)
+	if err != nil {
+		fmt.Errorf("ERROR: %s\n", err)
+	}
+	fmt.Printf("DELETED: %d\n", n)
+	ts.Dump()
+	// Output:
+	// DELETED: 3
+	// [INIT] Default VALUE: <nil>
+	// [0] TIME: 1995-10-18 08:37:01 +0000 UTC | VALUE: 1995
+	// [1] TIME: 1999-10-18 08:37:01 +0000 UTC | VALUE: 1999
+}
+
 func ExampleSetWindowValue() {
 	var t0, t1, tm0, tm1 time.Time
 

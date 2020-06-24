@@ -4,14 +4,15 @@ import (
 	"time"
 )
 
+// Distribution computes distribucion in time of values from start to end
+// and only on these periods where the USTimeSerie mask will be true. False periods won't compute on time distribution
+// mask = nil will be equivalent to a true always USTimeSerie mask
+// ir returns a interfaced keyed map of durations and the complete computed time ( will be end - start if no mask)
 func (uts *USTimeSerie) Distribution(start time.Time, end time.Time, mask *USTimeSerie) (map[interface{}]time.Duration, time.Duration, error) {
 
 	var tdur time.Duration
 	ret := make(map[interface{}]time.Duration)
-	ilog.Debugf("####################### DISTRIBUTION ##################\n")
-
-	ilog.Debugf("START %s\n", start)
-	ilog.Debugf("END %s\n", end)
+	ilog.Debugf(">>>>USTS DEBUG [USTimeSerie:Distribution]: start/end [%s/%s] \n", start, end)
 
 	if mask == nil {
 
@@ -31,7 +32,7 @@ func (uts *USTimeSerie) Distribution(start time.Time, end time.Time, mask *USTim
 					} else {
 						ret[val] = dur
 					}
-					ilog.Debugf("Counting value [%v] Interval  from [%s] to [%s] - Duration %s\n", val, t0, t1, dur)
+					ilog.Debugf(">>>>USTS DEBUG [USTimeSerie:Distribution]: Interval from [%s/%s] Counting value [%v] with Duration %s | Total: \n", t0, t1, val, dur, ret[val])
 					return true
 					//End TimeSerie Period
 				})

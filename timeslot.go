@@ -116,11 +116,11 @@ func GetPreviousCronTime(sch cron.Schedule, start time.Time) time.Time {
 	}
 
 	for _, i := range intervals {
-		ilog.Debugf("GetPrevious interval %s", i)
+		ilog.Debugf(">>>>USTS DEBUG:GetPrevious interval %s", i)
 		before := start.Add(-i)
 		count := 0
 		for {
-			ilog.Debugf("Test bfore %s/%d", before, count)
+			ilog.Debugf(">>>>USTS DEBUG:Test bfore %s/%d", before, count)
 			iter := sch.Next(before)
 			if iter.After(start) && count > 0 {
 				return before
@@ -147,7 +147,7 @@ func (ts *TimeSlot) GetClosestPreviousEvent(start time.Time) (time.Time, bool) {
 		return tStart, true
 
 	}
-	ilog.Warnf("Warn:not selected previous event")
+	ilog.Warnf(">>>>USTS WARN:Warn:not selected previous event")
 	return start, true
 }
 
@@ -186,7 +186,7 @@ func (ts *TimeSlot) GetTimeEvents(start, end time.Time, tz string) (*USTimeSerie
 	}
 	tret, err := tok.Combine(tnok)
 	tinit, state := ts.GetClosestPreviousEvent(start)
-	ilog.Debugf("Set default value for t = %s in %t", tinit, state)
+	ilog.Debugf(">>>>USTS DEBUG:Set default value for t = %s in %t", tinit, state)
 	tret.SetDefault(state)
 	return tret, err
 }

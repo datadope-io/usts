@@ -8,12 +8,12 @@ import (
 func ExampleTimeSlot_1() {
 	slot, err := NewTimeSlot("work_hours_1", "00 08 * * *", "00 15 * * * ")
 	if err != nil {
-		ilog.Errorf("Error: %s", err)
+		ilog.Errorf(">>>>USTS ERROR:Error: %s", err)
 		return
 	}
 	t0 := time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
 	t1 := time.Date(2000, 1, 7, 0, 0, 0, 0, time.UTC)
-	ilog.Debugf("%+v", slot)
+	ilog.Debugf(">>>>USTS DEBUG:%+v", slot)
 	events, err := slot.GetTimeEvents(t0, t1, "Europe/Madrid")
 	if err != nil {
 		fmt.Printf("Error: %s", err)
@@ -40,12 +40,12 @@ func ExampleTimeSlot_1() {
 func ExampleTimeSlot_2() {
 	slot, err := NewTimeSlot("24x7", "00 00 * * *", "00 00 * * *")
 	if err != nil {
-		ilog.Errorf("Error: %s", err)
+		ilog.Errorf(">>>>USTS ERROR:Error: %s", err)
 		return
 	}
 	t0 := time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
 	t1 := time.Date(2000, 1, 7, 0, 0, 0, 0, time.UTC)
-	ilog.Debugf("%+v", slot)
+	ilog.Debugf(">>>>USTS DEBUG:%+v", slot)
 	events, err := slot.GetTimeEvents(t0, t1, "Europe/Madrid")
 	if err != nil {
 		fmt.Printf("Error: %s", err)
@@ -65,12 +65,12 @@ func ExampleTimeSlot_2() {
 func ExampleTimeSlot_3() {
 	slot, err := NewTimeSlot("24x7_b", "00 00 * * MON", "00 00 * * MON")
 	if err != nil {
-		ilog.Errorf("Error: %s", err)
+		ilog.Errorf(">>>>USTS ERROR:Error: %s", err)
 		return
 	}
 	t0 := time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
 	t1 := time.Date(2000, 1, 7, 0, 0, 0, 0, time.UTC)
-	ilog.Debugf("%+v", slot)
+	ilog.Debugf(">>>>USTS DEBUG:%+v", slot)
 	events, err := slot.GetTimeEvents(t0, t1, "Europe/Madrid")
 	if err != nil {
 		fmt.Printf("Error: %s", err)

@@ -1,4 +1,3 @@
-
 <p align="center">
 <h1 align="center">USTS  ( Unevently Spaced Time Series ) </h1>
 <p align="center">Unevenly spaced time series library for Go and other time/slots/window helpers to deal with Unevenly spaced time events
