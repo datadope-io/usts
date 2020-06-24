@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/rickar/cal/v2"
-	log "github.com/sirupsen/logrus"
 )
 
 type AddSlotMode int
@@ -58,7 +57,7 @@ func CalendarWindowEvents(c *cal.Calendar, tz string, start, end time.Time) (*US
 	if len(tz) > 0 {
 		cron_tpl = "CRON_TZ=" + tz + " 00 00 * * * "
 	}
-	log.Debugf("CRON START: %s ", cron_tpl)
+	ilog.Debugf("CRON START: %s ", cron_tpl)
 	sched, err := crparser.Parse(cron_tpl)
 	if err != nil {
 		return nil, fmt.Errorf("ERROR on parse Start cron expression : %s", err)

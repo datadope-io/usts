@@ -3,8 +3,6 @@ package usts
 import (
 	"fmt"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type InterPolateOps int
@@ -48,7 +46,7 @@ func (uts *USTimeSerie) Insert(t time.Time, value interface{}) (int, bool) {
 
 	uts.m[t] = value
 	i, _ := uts.getIndex(t)
-	//log.Debugf("**********DEBUG TIME %s INDEX %d (found %t)\n",t,i,ok)
+	//ilog.Debugf("**********DEBUG TIME %s INDEX %d (found %t)\n",t,i,ok)
 	uts.t = append(uts.t[:i], append([]time.Time{t}, uts.t[i:]...)...)
 	return i, false
 
@@ -66,22 +64,22 @@ func (uts *USTimeSerie) Insert(t time.Time, value interface{}) (int, bool) {
 // getIndex Set Index for Placing new elements
 func (uts *USTimeSerie) getIndex(t time.Time) (int, bool) {
 	if len(uts.t) == 0 {
-		//  log.Debugf("------------>INIT\n")
+		//  ilog.Debugf("------------>INIT\n")
 		return 0, false
 	}
 	for k, v := range uts.t {
 		switch {
 		case t.After(v):
-			log.Tracef("[%d]-----[%s]------->AFTER[%s]\n", k, t, v)
+			ilog.Tracef("[%d]-----[%s]------->AFTER[%s]\n", k, t, v)
 		case t.Equal(v):
-			log.Tracef("[%d]-----[%s]------->EQUAL[%s]\n", k, t, v)
+			ilog.Tracef("[%d]-----[%s]------->EQUAL[%s]\n", k, t, v)
 			return k, true
 		case t.Before(v):
-			log.Tracef("[%d]-----[%s]------->BEFORE[%s]\n", k, t, v)
+			ilog.Tracef("[%d]-----[%s]------->BEFORE[%s]\n", k, t, v)
 			return k, false
 		}
 	}
-	log.Tracef("------------>FINAL\n")
+	ilog.Tracef("------------>FINAL\n")
 	return len(uts.t), false
 }
 
@@ -128,7 +126,7 @@ func (uts *USTimeSerie) getLeftRightIndexInsidePeriod(start, end time.Time) (int
 	var t time.Time
 	t = start
 	for k, v := range uts.t {
-		log.Tracef(" START[%d]-----[%s]------->[%s]\n", k, t, v)
+		ilog.Tracef(" START[%d]-----[%s]------->[%s]\n", k, t, v)
 		if t.Equal(v) {
 			s = k
 			break
@@ -141,11 +139,11 @@ func (uts *USTimeSerie) getLeftRightIndexInsidePeriod(start, end time.Time) (int
 	//check if next point time is also greater than end time
 	// could be if no points between start/end
 
-	log.Debugf(">>>>START ---> %d\n", s)
+	ilog.Debugf(">>>>START ---> %d\n", s)
 	//End
 	t = end
 	for k, v := range uts.t {
-		log.Tracef(" END[%d]-----[%s]------->[%s]\n", k, t, v)
+		ilog.Tracef(" END[%d]-----[%s]------->[%s]\n", k, t, v)
 		if t.Equal(v) {
 			e = k
 			break
@@ -155,19 +153,19 @@ func (uts *USTimeSerie) getLeftRightIndexInsidePeriod(start, end time.Time) (int
 			break
 		}
 	}
-	log.Tracef(" S[%d] E[%d]\n", s, e)
+	ilog.Tracef(" S[%d] E[%d]\n", s, e)
 	//TODO: this condition is not always true... should be reviewed
 	if e < s && s-e == 1 {
 		//complete period inside 2 consecutive points
 		//return swapped values with error
-		log.Tracef(" SWAP VALUES now START %d and END %d\n", e, s)
+		ilog.Tracef(" SWAP VALUES now START %d and END %d\n", e, s)
 		return e, s, fmt.Errorf("Period inside two consecutive points")
 	}
 	if e == 0 {
 		e = len(uts.t) - 1
 	}
-	log.Debugf(">>>>>END ---> %d\n", e)
-	log.Debugf("--------->DEBUG START %d / END %d\n", s, e)
+	ilog.Debugf(">>>>>END ---> %d\n", e)
+	ilog.Debugf("--------->DEBUG START %d / END %d\n", s, e)
 	return s, e, nil
 }
 
@@ -194,7 +192,7 @@ func (uts *USTimeSerie) BatchDelete(start time.Time, end time.Time) (int, error)
 		//in any other case there is no points to delete in this interval
 		return 0, nil
 	}
-	log.Debugf("DEBUG DELETE index START %d/END %d\n", s, e)
+	ilog.Debugf("DEBUG DELETE index START %d/END %d\n", s, e)
 	var retval int
 	if e == s {
 		return 0, nil
@@ -202,7 +200,7 @@ func (uts *USTimeSerie) BatchDelete(start time.Time, end time.Time) (int, error)
 	for i := s; i <= e; i++ {
 		retval++
 		t := uts.t[i]
-		log.Debugf(">>>>>>>>>>>>>>>> DEBUG BATCH DELETE index[%d] time[%s] value %v\n", i, t, uts.m[t])
+		ilog.Debugf(">>>>>>>>>>>>>>>> DEBUG BATCH DELETE index[%d] time[%s] value %v\n", i, t, uts.m[t])
 		delete(uts.m, t)
 		//uts.t = append(uts.t[:i], uts.t[i+1:]...)
 	}
@@ -352,23 +350,23 @@ func (uts *USTimeSerie) Compact() (bool, int) {
 type IteratePeriodFunc func(t0, t1 time.Time, value interface{}) bool
 
 func (uts *USTimeSerie) IterateOnPeriods(start, end time.Time, filter interface{}, f IteratePeriodFunc) error {
-	log.Debugf("START TIME %s", start)
-	log.Debugf("END TIME %s", end)
+	ilog.Debugf("START TIME %s", start)
+	ilog.Debugf("END TIME %s", end)
 	s, e, err := uts.getLeftRightIndexInsidePeriod(start, end)
-	log.Debugf("START/END INDEX [%d/%d]", s, e)
+	ilog.Debugf("START/END INDEX [%d/%d]", s, e)
 	if err != nil {
 		switch {
 		case s == 0 && e == 0:
-			log.Debugf(" Distribution Error Case 1 [%d/%d]\n", s, e)
+			ilog.Debugf(" Distribution Error Case 1 [%d/%d]\n", s, e)
 			return err
 		case s == -1 && e == -1:
-			log.Debugf(" Distribution Error Case 2 [%d/%d]\n", s, e)
+			ilog.Debugf(" Distribution Error Case 2 [%d/%d]\n", s, e)
 			fallthrough
 		case s == -1 && e == 0: // start/end prior to any data (using defVal)
-			log.Debugf(" Distribution Error Case 3 [%d/%d]\n", s, e)
+			ilog.Debugf(" Distribution Error Case 3 [%d/%d]\n", s, e)
 			val := uts.defVal
 			if filter != nil {
-				log.Debugf(" Distribution Error Case 3 filter %v / value %v\n", filter, val)
+				ilog.Debugf(" Distribution Error Case 3 filter %v / value %v\n", filter, val)
 				if val == filter {
 					f(start, end, val)
 				}
@@ -377,7 +375,7 @@ func (uts *USTimeSerie) IterateOnPeriods(start, end time.Time, filter interface{
 			}
 			return nil
 		case s == 0 && e == -1: // start/end after last data
-			log.Debugf(" Distribution Error Case 4 [%d/%d]\n", s, e)
+			ilog.Debugf(" Distribution Error Case 4 [%d/%d]\n", s, e)
 			_, val, _ := uts.Last()
 			if filter != nil {
 				if val == filter {
@@ -388,7 +386,7 @@ func (uts *USTimeSerie) IterateOnPeriods(start, end time.Time, filter interface{
 			}
 			return nil
 		default:
-			log.Debugf(" Distribution Error Case 5 [%d/%d]\n", s, e)
+			ilog.Debugf(" Distribution Error Case 5 [%d/%d]\n", s, e)
 			//period inside 2 consecutive values s/e ouside period in this case
 			//value from start
 			t := uts.t[s]
@@ -405,7 +403,7 @@ func (uts *USTimeSerie) IterateOnPeriods(start, end time.Time, filter interface{
 	}
 
 	if start.Before(uts.t[s]) {
-		log.Debugf(" Distribution Case 0 [%d/%d]\n", s, e)
+		ilog.Debugf(" Distribution Case 0 [%d/%d]\n", s, e)
 		var val interface{}
 		if s == 0 {
 			val = uts.defVal
@@ -432,7 +430,7 @@ func (uts *USTimeSerie) IterateOnPeriods(start, end time.Time, filter interface{
 	}
 
 	for i := s; i < e; i++ {
-		log.Debugf(" Distribution Case 1 [%d/%d] interval %d\n", s, e, i)
+		ilog.Debugf(" Distribution Case 1 [%d/%d] interval %d\n", s, e, i)
 		t0 := uts.t[i]
 		val := uts.m[t0]
 
@@ -450,7 +448,7 @@ func (uts *USTimeSerie) IterateOnPeriods(start, end time.Time, filter interface{
 	}
 
 	if end.After(uts.t[e]) {
-		log.Debugf(" Distribution Case 2 [%d/%d]\n", s, e)
+		ilog.Debugf(" Distribution Case 2 [%d/%d]\n", s, e)
 		t0 := uts.t[e]
 		val := uts.m[t0]
 		t1 := end
@@ -478,10 +476,10 @@ func (uts *USTimeSerie) SetIntervalValue(start, end time.Time, value interface{}
 	//remove all values in this window
 	n, err := uts.BatchDelete(start, end)
 	if err != nil {
-		log.Errorf("Error on batch delete from %s/%s: Error: %s", start, end, err)
+		ilog.Errorf("Error on batch delete from %s/%s: Error: %s", start, end, err)
 		return err
 	}
-	log.Debugf("Deleted %d values", n)
+	ilog.Debugf("Deleted %d values", n)
 	//create 2 entries
 	// start with value
 	// end with default value

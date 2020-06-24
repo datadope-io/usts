@@ -5,7 +5,6 @@ import (
 	"time"
 
 	cron "github.com/robfig/cron/v3"
-	log "github.com/sirupsen/logrus"
 )
 
 var crparser = cron.NewParser(cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow)
@@ -117,11 +116,11 @@ func GetPreviousCronTime(sch cron.Schedule, start time.Time) time.Time {
 	}
 
 	for _, i := range intervals {
-		log.Debugf("GetPrevious interval %s", i)
+		ilog.Debugf("GetPrevious interval %s", i)
 		before := start.Add(-i)
 		count := 0
 		for {
-			log.Debugf("Test bfore %s/%d", before, count)
+			ilog.Debugf("Test bfore %s/%d", before, count)
 			iter := sch.Next(before)
 			if iter.After(start) && count > 0 {
 				return before
@@ -148,7 +147,7 @@ func (ts *TimeSlot) GetClosestPreviousEvent(start time.Time) (time.Time, bool) {
 		return tStart, true
 
 	}
-	log.Warnf("Warn:not selected previous event")
+	ilog.Warnf("Warn:not selected previous event")
 	return start, true
 }
 
@@ -165,6 +164,8 @@ func (ts *TimeSlot) GetTimeEvents(start, end time.Time, tz string) (*USTimeSerie
 	tnok := NewUSTimeSerie(0)
 	//tnok.SetDefault(true)
 
+	//1 second below Needed to get start time if match
+	// with scheduled events with Next() function
 	tnext := start.Add(-1 * time.Second)
 	for {
 		t := ts.scs.Next(tnext)
@@ -185,7 +186,7 @@ func (ts *TimeSlot) GetTimeEvents(start, end time.Time, tz string) (*USTimeSerie
 	}
 	tret, err := tok.Combine(tnok)
 	tinit, state := ts.GetClosestPreviousEvent(start)
-	log.Debugf("Set default value for t = %s in %t", tinit, state)
+	ilog.Debugf("Set default value for t = %s in %t", tinit, state)
 	tret.SetDefault(state)
 	return tret, err
 }

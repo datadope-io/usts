@@ -2,18 +2,16 @@ package usts
 
 import (
 	"time"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func (uts *USTimeSerie) Distribution(start time.Time, end time.Time, mask *USTimeSerie) (map[interface{}]time.Duration, time.Duration, error) {
 
 	var tdur time.Duration
 	ret := make(map[interface{}]time.Duration)
-	log.Debugf("####################### DISTRIBUTION ##################\n")
+	ilog.Debugf("####################### DISTRIBUTION ##################\n")
 
-	log.Debugf("START %s\n", start)
-	log.Debugf("END %s\n", end)
+	ilog.Debugf("START %s\n", start)
+	ilog.Debugf("END %s\n", end)
 
 	if mask == nil {
 
@@ -33,7 +31,7 @@ func (uts *USTimeSerie) Distribution(start time.Time, end time.Time, mask *USTim
 					} else {
 						ret[val] = dur
 					}
-					log.Debugf("Counting value [%v] Interval  from [%s] to [%s] - Duration %s\n", val, t0, t1, dur)
+					ilog.Debugf("Counting value [%v] Interval  from [%s] to [%s] - Duration %s\n", val, t0, t1, dur)
 					return true
 					//End TimeSerie Period
 				})

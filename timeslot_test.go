@@ -3,19 +3,17 @@ package usts
 import (
 	"fmt"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func ExampleTimeSlot_1() {
 	slot, err := NewTimeSlot("work_hours_1", "00 08 * * *", "00 15 * * * ")
 	if err != nil {
-		log.Errorf("Error: %s", err)
+		ilog.Errorf("Error: %s", err)
 		return
 	}
 	t0 := time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
 	t1 := time.Date(2000, 1, 7, 0, 0, 0, 0, time.UTC)
-	log.Debugf("%+v", slot)
+	ilog.Debugf("%+v", slot)
 	events, err := slot.GetTimeEvents(t0, t1, "Europe/Madrid")
 	if err != nil {
 		fmt.Printf("Error: %s", err)
@@ -42,12 +40,12 @@ func ExampleTimeSlot_1() {
 func ExampleTimeSlot_2() {
 	slot, err := NewTimeSlot("24x7", "00 00 * * *", "00 00 * * *")
 	if err != nil {
-		log.Errorf("Error: %s", err)
+		ilog.Errorf("Error: %s", err)
 		return
 	}
 	t0 := time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
 	t1 := time.Date(2000, 1, 7, 0, 0, 0, 0, time.UTC)
-	log.Debugf("%+v", slot)
+	ilog.Debugf("%+v", slot)
 	events, err := slot.GetTimeEvents(t0, t1, "Europe/Madrid")
 	if err != nil {
 		fmt.Printf("Error: %s", err)
@@ -67,12 +65,12 @@ func ExampleTimeSlot_2() {
 func ExampleTimeSlot_3() {
 	slot, err := NewTimeSlot("24x7_b", "00 00 * * MON", "00 00 * * MON")
 	if err != nil {
-		log.Errorf("Error: %s", err)
+		ilog.Errorf("Error: %s", err)
 		return
 	}
 	t0 := time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
 	t1 := time.Date(2000, 1, 7, 0, 0, 0, 0, time.UTC)
-	log.Debugf("%+v", slot)
+	ilog.Debugf("%+v", slot)
 	events, err := slot.GetTimeEvents(t0, t1, "Europe/Madrid")
 	if err != nil {
 		fmt.Printf("Error: %s", err)

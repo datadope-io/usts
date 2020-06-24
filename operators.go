@@ -3,8 +3,6 @@ package usts
 import (
 	"fmt"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 )
 
 //------------------------------------
@@ -113,7 +111,7 @@ func (uts *USTimeSerie) And(other *USTimeSerie) (*USTimeSerie, error) {
 
 		v1, _ := uts.Get(t)
 		v2, _ := other.Get(t)
-		log.Debugf("computing value for time %s [ %+v AND %+v ]", t, v1, v2)
+		ilog.Debugf("computing value for time %s [ %+v AND %+v ]", t, v1, v2)
 		result := (v1.(bool) && v2.(bool))
 		res.Add(t, result)
 
@@ -152,7 +150,7 @@ func (uts *USTimeSerie) Or(other *USTimeSerie) (*USTimeSerie, error) {
 
 		v1, _ := uts.Get(t)
 		v2, _ := other.Get(t)
-		log.Debugf("computing value for time %s [ %+v AND %+v ]", t, v1, v2)
+		ilog.Debugf("computing value for time %s [ %+v AND %+v ]", t, v1, v2)
 		result := (v1.(bool) || v2.(bool))
 		res.Add(t, result)
 
@@ -197,7 +195,7 @@ func (uts *USTimeSerie) Xor(other *USTimeSerie) (*USTimeSerie, error) {
 
 		v1, _ := uts.Get(t)
 		v2, _ := other.Get(t)
-		log.Debugf("computing value for time %s [ %+v XOR %+v ]", t, v1, v2)
+		ilog.Debugf("computing value for time %s [ %+v XOR %+v ]", t, v1, v2)
 		result := false
 		if v1.(bool) == v2.(bool) {
 			result = true
@@ -225,7 +223,7 @@ func (uts *USTimeSerie) Not() (*USTimeSerie, error) {
 		val := uts.m[t]
 		result := !val.(bool)
 		res.Add(t, result)
-		log.Debugf("computing value for time %s [ ! %+v ]", t, val)
+		ilog.Debugf("computing value for time %s [ ! %+v ]", t, val)
 	}
 	return res, nil
 }
@@ -246,7 +244,7 @@ func (uts *USTimeSerie) Combine(other *USTimeSerie) (*USTimeSerie, error) {
 
 		v1, ok1 := uts.GetExact(t)
 		v2, ok2 := other.GetExact(t)
-		log.Debugf("computing value for time %s [ %+v COMBINED %+v ]", t, v1, v2)
+		ilog.Debugf("computing value for time %s [ %+v COMBINED %+v ]", t, v1, v2)
 		var result interface{}
 		switch {
 		case ok1 && ok2:
