@@ -241,7 +241,7 @@ func (uts *USTimeSerie) Not() (*USTimeSerie, error) {
 
 // Combine merges this TimeSerie with other , The resulting TimeSerie will have the
 // same time points in both previous series (max will be N+M if any repeated time)
-// no logical operations done, it only merges data exept on time concidence where logical OR will be placed.
+// no logical operations done, it only merges data except on time concidence where logical OR will be placed.
 // `output[t1] = x[t1] (if not exist y[t1])`
 // `output[t2] = y[t2] (if not exist x[t2])`
 // `output[t3] = x[t3] OR y[t3] ( if both series has values in t3)`
