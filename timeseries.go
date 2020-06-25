@@ -242,12 +242,12 @@ func (uts *USTimeSerie) Keys() []time.Time {
 	return uts.t
 }
 
-// TimeSortedMapIterFunc helps users to iterate over the time serie entries
+// IterateElementFunc helps users to iterate over the time serie entries
 // return true if would like continue the iteration process
-type TimeSortedMapIterFunc func(time.Time, interface{}, int) bool
+type IterateElementFunc func(time.Time, interface{}, int) bool
 
 // Iterate Initialize an Iterator process over timeseries in time reversed order if reversed = true
-func (uts *USTimeSerie) Iterate(reversed bool, start, end time.Time, f TimeSortedMapIterFunc) error {
+func (uts *USTimeSerie) Iterate(reversed bool, start, end time.Time, f IterateElementFunc) error {
 
 	s, e, err := uts.getLeftRightIndexInsidePeriod(start, end)
 	if err != nil {
@@ -332,7 +332,7 @@ func (uts *USTimeSerie) RemoveFromInterval(start time.Time, end time.Time) (int,
 	return uts.BatchDelete(start, end)
 }
 
-// Add insert a new element witn time t and value v or updates it if existing yet in the same time t
+// Add insert a new element with time t and value v or updates it if existing yet in the same time t
 func (uts *USTimeSerie) Add(t time.Time, v interface{}) (int, bool) {
 	return uts.Insert(t, v)
 }
@@ -441,7 +441,7 @@ func (uts *USTimeSerie) IterateOnPeriods(start, end time.Time, filter interface{
 	}
 
 	if start.Before(uts.t[s]) {
-		ilog.Debugf(">>>>USTS DEBUG [USTimeSerie:IterateOnPeriods]: Process Start Interval [%d/%d]\n", s, e)
+		ilog.Tracef(">>>>USTS TRACE [USTimeSerie:IterateOnPeriods]: Process Start Interval [%d/%d]\n", s, e)
 		var val interface{}
 		if s == 0 {
 			val = uts.defVal
@@ -470,7 +470,7 @@ func (uts *USTimeSerie) IterateOnPeriods(start, end time.Time, filter interface{
 	}
 
 	for i := s; i < e; i++ {
-		ilog.Debugf(">>>>USTS DEBUG [USTimeSerie:IterateOnPeriods]: Process Mid Interval %d [%d/%d]\n", i, s, e)
+		ilog.Tracef(">>>>USTS TRACE [USTimeSerie:IterateOnPeriods]: Process Mid Interval %d [%d/%d]\n", i, s, e)
 		t0 := uts.t[i]
 		t1 := uts.t[i+1]
 		val := uts.m[t0]
@@ -488,7 +488,7 @@ func (uts *USTimeSerie) IterateOnPeriods(start, end time.Time, filter interface{
 	}
 
 	if end.After(uts.t[e]) {
-		ilog.Debugf(">>>>USTS DEBUG [USTimeSerie:IterateOnPeriods]: Process End Interval  [%d/%d]\n", s, e)
+		ilog.Tracef(">>>>USTS TRACE [USTimeSerie:IterateOnPeriods]: Process End Interval  [%d/%d]\n", s, e)
 		t0 := uts.t[e]
 		val := uts.m[t0]
 		t1 := end
