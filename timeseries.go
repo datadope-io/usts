@@ -27,6 +27,19 @@ func NewUSTimeSerie(size int) *USTimeSerie {
 	return uts
 }
 
+// Clone Return a new allocated TimeSeries with the exact data from the origin
+func (uts *USTimeSerie) Clone() *USTimeSerie {
+	cloned := NewUSTimeSerie(uts.Len())
+	for _, v := range uts.t {
+		cloned.t = append(cloned.t, v)
+	}
+	for k, v := range uts.m {
+		cloned.m[k] = v
+	}
+	cloned.defVal = uts.defVal
+	return cloned
+}
+
 // Len Return the number of elements in the Serie
 func (uts *USTimeSerie) Len() int {
 	return len(uts.t)
