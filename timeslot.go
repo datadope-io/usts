@@ -9,17 +9,10 @@ import (
 
 var crparser = cron.NewParser(cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow)
 
+// TimeSlot this object give us ability to create periodic time intervals from some logic expresion
 type TimeSlot struct {
 	ID string
-	// Month    string
-	// Dom      string //DayOfMonth
-	// Dow      string //DayOfWeek
-	// InitHour string
-	// InitMin  string
-	// EndHour  string
-	// EndMin   string
 
-	//tzName string
 	//-------------------------------------
 	scf string        //Start Cron Format
 	ecf string        //End Cron Format
@@ -27,6 +20,7 @@ type TimeSlot struct {
 	ecs cron.Schedule //End Cron Schedule
 }
 
+// NewTimeSlot create a periodic time slot from cron based expression for start and end time slot
 func NewTimeSlot(id, startexpr, endexpr string) (*TimeSlot, error) {
 
 	var err error
@@ -50,60 +44,34 @@ func NewTimeSlot(id, startexpr, endexpr string) (*TimeSlot, error) {
 	return ret, nil
 }
 
-// func NewTimeSlot(m, md, wd, ih, eh string) (*TimeSlot, error) {
-
-// 	ret := &TimeSlot{}
-
-// 	ret.ID = fmt.Sprintf("%s - %s - %s - %s/%s", m, md, wd, ih, eh)
-// 	ret.Month = m
-// 	ret.Dom = md
-// 	ret.Dow = wd
-
-// 	re := regexp.MustCompile(`^([0-9]|0[0-9]|1[0-9]|2[0-3]):([0-9]|[0-5][0-9])$`)
-
-// 	if !re.MatchString(ih) {
-// 		return nil, fmt.Errorf("Initial Hour [%s] error format ", ih)
-// 	}
-
-// 	var data []string
-// 	data = strings.Split(ih, ":")
-// 	ret.InitHour = data[0]
-// 	ret.InitMin = data[1]
-
-// 	if !re.MatchString(ih) {
-// 		return nil, fmt.Errorf("Initial Hour [%s] error format ", ih)
-// 	}
-// 	data = strings.Split(eh, ":")
-// 	ret.EndHour = data[0]
-// 	ret.EndMin = data[1]
-
-// 	return ret, nil
-// }
-
+// RefreshCronTZ reload cron based expressions adding timezone info
 func (ts *TimeSlot) RefreshCronTZ(tz string) error {
 	var err error
 
-	cron_tpl_start := ts.scf
-	cron_tpl_end := ts.ecf
+	cronTplStart := ts.scf
+	cronTplEnd := ts.ecf
 
 	if len(tz) > 0 {
-		cron_tpl_start = "CRON_TZ=" + tz + " " + ts.scf
-		cron_tpl_end = "CRON_TZ=" + tz + " " + ts.ecf
+		cronTplStart = "CRON_TZ=" + tz + " " + ts.scf
+		cronTplEnd = "CRON_TZ=" + tz + " " + ts.ecf
 	}
 
 	//START
-	ts.scs, err = crparser.Parse(cron_tpl_start)
+	ts.scs, err = crparser.Parse(cronTplStart)
 	if err != nil {
 		return fmt.Errorf("ERROR on parse Start cron expression : %s", err)
 	}
 	//END
-	ts.ecs, err = crparser.Parse(cron_tpl_end)
+	ts.ecs, err = crparser.Parse(cronTplEnd)
 	if err != nil {
 		return fmt.Errorf("ERROR on parse End cron expression : %s", err)
 	}
 	return nil
 }
 
+// GetPreviousCronTime get Previous scheduled time from cron Scheduler
+// this method will check if exist any previous sched value beggining in the past
+// in order to avoid too expensive cost we will test iteratively with 1h,6h,24h,7d,30d,365d before
 func GetPreviousCronTime(sch cron.Schedule, start time.Time) time.Time {
 
 	intervals := []time.Duration{
@@ -116,11 +84,11 @@ func GetPreviousCronTime(sch cron.Schedule, start time.Time) time.Time {
 	}
 
 	for _, i := range intervals {
-		ilog.Debugf(">>>>USTS DEBUG:GetPrevious interval %s", i)
+		ilog.Debugf(">>>>USTS DEBUG [GetPreviousCronTime]: GetPrevious from interval %s", i)
 		before := start.Add(-i)
 		count := 0
 		for {
-			ilog.Debugf(">>>>USTS DEBUG:Test bfore %s/%d", before, count)
+			ilog.Debugf(">>>>USTS DEBUG [GetPreviousCronTime]:Test before %s/%d", before, count)
 			iter := sch.Next(before)
 			if iter.After(start) && count > 0 {
 				return before
@@ -137,20 +105,26 @@ func GetPreviousCronTime(sch cron.Schedule, start time.Time) time.Time {
 func (ts *TimeSlot) GetClosestPreviousEvent(start time.Time) (time.Time, bool) {
 
 	tStart := GetPreviousCronTime(ts.scs, start)
+	ilog.Debugf(">>>>USTS DEBUG [TimeSlot:GetClosestPreviousEvent]: from Start Expression [%s] got on time [%s]", ts.scf, tStart)
 	tEnd := GetPreviousCronTime(ts.ecs, start)
+	ilog.Debugf(">>>>USTS DEBUG [TimeSlot:GetClosestPreviousEvent]: from End Expression [%s] got on time [%s]", ts.ecf, tEnd)
 	switch {
 	case tStart.After(tEnd):
+		ilog.Debugf(">>>>USTS DEBUG [TimeSlot:GetClosestPreviousEvent]: Start after end => (start expr wins)TRUE")
 		return tStart, true
 	case tStart.Before(tEnd):
+		ilog.Debugf(">>>>USTS DEBUG [TimeSlot:GetClosestPreviousEvent]: Start before end => (end expr wins) FALSE")
 		return tEnd, false
 	case tStart.Equal(tEnd):
+		ilog.Debugf(">>>>USTS DEBUG [TimeSlot:GetClosestPreviousEvent]: Start == end => Set to TRUE")
 		return tStart, true
 
 	}
-	ilog.Warnf(">>>>USTS WARN:Warn:not selected previous event")
+	ilog.Warnf(">>>>USTS WARN [TimeSlot:GetClosestPreviousEvent]: can not selected previous event")
 	return start, true
 }
 
+// GetTimeEvents get all initial(as true)/final(as false) slot events
 func (ts *TimeSlot) GetTimeEvents(start, end time.Time, tz string) (*USTimeSerie, error) {
 
 	err := ts.RefreshCronTZ(tz)
@@ -159,10 +133,8 @@ func (ts *TimeSlot) GetTimeEvents(start, end time.Time, tz string) (*USTimeSerie
 	}
 
 	tok := NewUSTimeSerie(0)
-	//tok.SetDefault(false)
 
 	tnok := NewUSTimeSerie(0)
-	//tnok.SetDefault(true)
 
 	//1 second below Needed to get start time if match
 	// with scheduled events with Next() function
@@ -186,7 +158,7 @@ func (ts *TimeSlot) GetTimeEvents(start, end time.Time, tz string) (*USTimeSerie
 	}
 	tret, err := tok.Combine(tnok)
 	tinit, state := ts.GetClosestPreviousEvent(start)
-	ilog.Debugf(">>>>USTS DEBUG:Set default value for t = %s in %t", tinit, state)
+	ilog.Debugf(">>>>USTS DEBUG[TimeSlot:GetTimeEvents] Set default value for t = %s in %t", tinit, state)
 	tret.SetDefault(state)
 	return tret, err
 }
