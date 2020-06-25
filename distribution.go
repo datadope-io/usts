@@ -21,6 +21,16 @@ func (uts *USTimeSerie) Distribution(start time.Time, end time.Time, mask *USTim
 
 	}
 
+	//Distribution needs to have defined elements on exact start/end
+	sVal, oks := uts.Get(start)
+	if !oks {
+		uts.Insert(start, sVal)
+	}
+	sEnd, oke := uts.Get(end)
+	if !oke {
+		uts.Insert(end, sEnd)
+	}
+
 	mask.IterateOnPeriods(start, end, true,
 		func(tm0, tm1 time.Time, valmask interface{}) bool {
 			uts.IterateOnPeriods(tm0, tm1, nil,

@@ -206,3 +206,35 @@ func ExampleDistribution() {
 	// VALUE NOK present for 5h50m57s :  83.56 %
 	// VALUE OK present for 1h9m3s :  16.44 %
 }
+
+func ExampleDistribution2() {
+	var err error
+	var t0, t1 time.Time
+	var total time.Duration
+	var totalsec int64
+	var m map[interface{}]time.Duration
+
+	ts := NewUSTimeSerie(0)
+
+	ts.Add(time.Date(2020, 6, 25, 12, 30, 0, 0, time.UTC), false)
+	ts.Add(time.Date(2020, 6, 25, 14, 30, 0, 0, time.UTC), true)
+
+	t0 = time.Date(2020, 6, 25, 14, 0, 0, 0, time.UTC)
+	t1 = time.Date(2020, 6, 25, 15, 0, 0, 0, time.UTC)
+
+	m, total, err = ts.Distribution(t0, t1, nil)
+	if err != nil {
+		fmt.Errorf("Error: %s", err)
+		return
+	}
+	totalsec = int64(total / time.Second)
+
+	for k, v := range m {
+		percent := float64(v/time.Second) * 100.0 / float64(totalsec)
+		fmt.Printf("VALUE %v present for %s :  %.2f %%\n", k, v, percent)
+	}
+
+	// Unordered output:
+	// VALUE false present for 30m0s :  50.00 %
+	// VALUE true present for 30m0s :  50.00 %
+}
