@@ -24,12 +24,9 @@ func ExampleTimeWindow_1() {
 	}
 	t0 := time.Date(2020, 4, 27, 0, 0, 0, 0, loc)
 	t1 := time.Date(2020, 5, 5, 0, 0, 0, 0, loc)
-	//24x7
+	//24x5
 	slot, err = NewTimeSlot("24x5", "00 00 * * MON-FRI", "00 00 * * SAT")
 
-	//Laborables
-	//	slot1, err = NewTimeSlot("00 09 * * MON-FRI,"00 14 * * MON-FRI")
-	//	slot2, err = NewTimeSlot("00 15 * * MON-FRI,"00 18 * * MON-FRI")
 	win.AddSlot(slot, Add)
 
 	ts, err = win.GetTimeEvents(t0, t1)
@@ -93,7 +90,7 @@ func ExampleTimeWindow_2() {
 
 }
 
-//Calender ES (only holidays) with no slots
+//Calender ES (only holidays) with  24x5 slot
 func ExampleTimeWindow_3() {
 
 	var ts *USTimeSerie
@@ -112,6 +109,14 @@ func ExampleTimeWindow_3() {
 		return
 	}
 	win.SetCalendar(calEspain)
+
+	slot, err := NewTimeSlot("24x5", "00 00 * * MON-FRI", "00 00 * * SAT")
+	if err != nil {
+		fmt.Printf("ERROR on get slot 24x5 %s\n", err)
+		return
+	}
+	win.AddSlot(slot, And)
+
 	t0 := time.Date(2020, 4, 27, 0, 0, 0, 0, loc)
 	t1 := time.Date(2020, 5, 5, 0, 0, 0, 0, loc)
 
@@ -122,24 +127,25 @@ func ExampleTimeWindow_3() {
 	}
 	ts.DumpInTimezone("Europe/Madrid")
 	// Output:
-	// [INIT] Default VALUE: true
-	// [0] TIME: 2020-04-28 00:00:00 +0200 CEST | VALUE: true
-	// [1] TIME: 2020-04-29 00:00:00 +0200 CEST | VALUE: true
-	// [2] TIME: 2020-04-30 00:00:00 +0200 CEST | VALUE: true
-	// [3] TIME: 2020-05-01 00:00:00 +0200 CEST | VALUE: false
-	// [4] TIME: 2020-05-02 00:00:00 +0200 CEST | VALUE: true
-	// [5] TIME: 2020-05-03 00:00:00 +0200 CEST | VALUE: true
-	// [6] TIME: 2020-05-04 00:00:00 +0200 CEST | VALUE: true
-	// [7] TIME: 2020-05-05 00:00:00 +0200 CEST | VALUE: true
-
+	// [INIT] Default VALUE: false
+	// [0] TIME: 2020-04-27 00:00:00 +0200 CEST | VALUE: true
+	// [1] TIME: 2020-04-28 00:00:00 +0200 CEST | VALUE: true
+	// [2] TIME: 2020-04-29 00:00:00 +0200 CEST | VALUE: true
+	// [3] TIME: 2020-04-30 00:00:00 +0200 CEST | VALUE: true
+	// [4] TIME: 2020-05-01 00:00:00 +0200 CEST | VALUE: false
+	// [5] TIME: 2020-05-02 00:00:00 +0200 CEST | VALUE: false
+	// [6] TIME: 2020-05-03 00:00:00 +0200 CEST | VALUE: false
+	// [7] TIME: 2020-05-04 00:00:00 +0200 CEST | VALUE: true
+	// [8] TIME: 2020-05-05 00:00:00 +0200 CEST | VALUE: true
 }
 
-//Calender ES (only holidays) with no slots
+//Calender ES (only holidays) with  24x5 slot less monday from 3 to 5
 func ExampleTimeWindow_4() {
 
 	var ts *USTimeSerie
 	var err error
 	var loc *time.Location
+	var slot *TimeSlot
 
 	var calEspain = &cal.Calendar{}
 	for _, h := range es.Holidays {
@@ -153,6 +159,20 @@ func ExampleTimeWindow_4() {
 		return
 	}
 	win.SetCalendar(calEspain)
+
+	slot, err = NewTimeSlot("24x5", "00 00 * * MON-FRI", "00 00 * * SAT")
+	if err != nil {
+		fmt.Printf("ERROR on get slot 24x5 %s\n", err)
+		return
+	}
+	win.AddSlot(slot, And)
+	slot, err = NewTimeSlot("mon_3_to_5", "00 03 * * MON", "00 05 * * MON")
+	if err != nil {
+		fmt.Printf("ERROR on get slot  mon_3_to_5 %s\n", err)
+		return
+	}
+	win.AddSlot(slot, Remove)
+
 	t0 := time.Date(2020, 4, 27, 0, 0, 0, 0, loc)
 	t1 := time.Date(2020, 5, 5, 0, 0, 0, 0, loc)
 
@@ -163,44 +183,65 @@ func ExampleTimeWindow_4() {
 	}
 	ts.DumpInTimezone("Europe/Madrid")
 	// Output:
-	// [INIT] Default VALUE: true
-	// [0] TIME: 2020-04-28 00:00:00 +0200 CEST | VALUE: true
-	// [1] TIME: 2020-04-29 00:00:00 +0200 CEST | VALUE: true
-	// [2] TIME: 2020-04-30 00:00:00 +0200 CEST | VALUE: true
-	// [3] TIME: 2020-05-01 00:00:00 +0200 CEST | VALUE: false
-	// [4] TIME: 2020-05-02 00:00:00 +0200 CEST | VALUE: true
-	// [5] TIME: 2020-05-03 00:00:00 +0200 CEST | VALUE: true
-	// [6] TIME: 2020-05-04 00:00:00 +0200 CEST | VALUE: true
-	// [7] TIME: 2020-05-05 00:00:00 +0200 CEST | VALUE: true
-
+	// [INIT] Default VALUE: false
+	// [0] TIME: 2020-04-27 00:00:00 +0200 CEST | VALUE: true
+	// [1] TIME: 2020-04-27 03:00:00 +0200 CEST | VALUE: false
+	// [2] TIME: 2020-04-27 05:00:00 +0200 CEST | VALUE: true
+	// [3] TIME: 2020-04-28 00:00:00 +0200 CEST | VALUE: true
+	// [4] TIME: 2020-04-29 00:00:00 +0200 CEST | VALUE: true
+	// [5] TIME: 2020-04-30 00:00:00 +0200 CEST | VALUE: true
+	// [6] TIME: 2020-05-01 00:00:00 +0200 CEST | VALUE: false
+	// [7] TIME: 2020-05-02 00:00:00 +0200 CEST | VALUE: false
+	// [8] TIME: 2020-05-03 00:00:00 +0200 CEST | VALUE: false
+	// [9] TIME: 2020-05-04 00:00:00 +0200 CEST | VALUE: true
+	// [10] TIME: 2020-05-04 03:00:00 +0200 CEST | VALUE: false
+	// [11] TIME: 2020-05-04 05:00:00 +0200 CEST | VALUE: true
+	// [12] TIME: 2020-05-05 00:00:00 +0200 CEST | VALUE: true
 }
 
+//Calender ES (only holidays) with  24x5 slot less monday from 3 to 5 plus saturday from 14:00 to 18:00
 func ExampleTimeWindow_5() {
-	var slot *TimeSlot
-	var ts, ts1 *USTimeSerie
+
+	var ts *USTimeSerie
 	var err error
 	var loc *time.Location
+	var slot *TimeSlot
 
-	win := NewTimeWindow("mon-to-fri-2_5_am")
+	var calEspain = &cal.Calendar{}
+	for _, h := range es.Holidays {
+		calEspain.AddHoliday(h)
+	}
+
+	win := NewTimeWindow("calendar_spain")
 	loc, err = win.SetTimeZone("Europe/Madrid")
 	if err != nil {
 		fmt.Printf("ERROR on set timeZone %s\n", err)
 		return
 	}
-	t0 := time.Date(2020, 4, 27, 0, 0, 0, 0, loc)
-	t1 := time.Date(2020, 5, 5, 0, 0, 0, 0, loc)
+	win.SetCalendar(calEspain)
 
-	slot, err = NewTimeSlot("mon-fri", "00 00 * * MON", "00 00 * * SAT")
+	slot, err = NewTimeSlot("24x5", "00 00 * * MON-FRI", "00 00 * * SAT")
+	if err != nil {
+		fmt.Printf("ERROR on get slot 24x5 %s\n", err)
+		return
+	}
+	win.AddSlot(slot, And)
+	slot, err = NewTimeSlot("mon_3_to_5", "00 03 * * MON", "00 05 * * MON")
+	if err != nil {
+		fmt.Printf("ERROR on get slot  mon_3_to_5 %s\n", err)
+		return
+	}
+	win.AddSlot(slot, Remove)
+
+	slot, err = NewTimeSlot("sat_15_to_18", "00 15 * * SAT", "00 18 * * SAT")
+	if err != nil {
+		fmt.Printf("ERROR on get slot  mon_3_to_5 %s\n", err)
+		return
+	}
 	win.AddSlot(slot, Add)
 
-	ts1, _ = slot.GetTimeEvents(t0, t1, "Europe/Madrid")
-	ts1.DumpInTimezone("Europe/Madrid")
-	//weekends
-	slot, err = NewTimeSlot("2to5am", "00 02 * * *", "00 05 * * * ")
-	win.AddSlot(slot, Remove)
-	ts1, _ = slot.GetTimeEvents(t0, t1, "Europe/Madrid")
-	ts1.DumpInTimezone("Europe/Madrid")
-	//mondays from 02:00 to 03:00
+	t0 := time.Date(2020, 4, 27, 0, 0, 0, 0, loc)
+	t1 := time.Date(2020, 5, 5, 0, 0, 0, 0, loc)
 
 	ts, err = win.GetTimeEvents(t0, t1)
 	if err != nil {
@@ -210,26 +251,19 @@ func ExampleTimeWindow_5() {
 	ts.DumpInTimezone("Europe/Madrid")
 	// Output:
 	// [INIT] Default VALUE: false
-	// [0] TIME: 2020-04-28 00:00:00 +0200 CEST | VALUE: true
-	// [1] TIME: 2020-04-29 00:00:00 +0200 CEST | VALUE: true
-	// [2] TIME: 2020-04-30 00:00:00 +0200 CEST | VALUE: true
-	// [3] TIME: 2020-05-01 00:00:00 +0200 CEST | VALUE: true
-	// [4] TIME: 2020-05-02 00:00:00 +0200 CEST | VALUE: true
-	// [5] TIME: 2020-05-03 00:00:00 +0200 CEST | VALUE: true
-	// [6] TIME: 2020-05-04 00:00:00 +0200 CEST | VALUE: true
-	// [7] TIME: 2020-05-05 00:00:00 +0200 CEST | VALUE: true
-	// [INIT] Default VALUE: false
-	// [0] TIME: 2020-05-02 00:00:00 +0200 CEST | VALUE: true
-	// [1] TIME: 2020-05-03 00:00:00 +0200 CEST | VALUE: true
-	// [1] TIME: 2020-05-04 00:00:00 +0200 CEST | VALUE: false
-	// [INIT] Default VALUE: false
-	// [0] TIME: 2020-04-28 00:00:00 +0200 CEST | VALUE: true
-	// [1] TIME: 2020-04-29 00:00:00 +0200 CEST | VALUE: true
-	// [2] TIME: 2020-04-30 00:00:00 +0200 CEST | VALUE: true
-	// [3] TIME: 2020-05-01 00:00:00 +0200 CEST | VALUE: true
-	// [4] TIME: 2020-05-02 00:00:00 +0200 CEST | VALUE: false
-	// [5] TIME: 2020-05-03 00:00:00 +0200 CEST | VALUE: false
-	// [6] TIME: 2020-05-04 00:00:00 +0200 CEST | VALUE: true
-	// [7] TIME: 2020-05-05 00:00:00 +0200 CEST | VALUE: true
-
+	// [0] TIME: 2020-04-27 00:00:00 +0200 CEST | VALUE: true
+	// [1] TIME: 2020-04-27 03:00:00 +0200 CEST | VALUE: false
+	// [2] TIME: 2020-04-27 05:00:00 +0200 CEST | VALUE: true
+	// [3] TIME: 2020-04-28 00:00:00 +0200 CEST | VALUE: true
+	// [4] TIME: 2020-04-29 00:00:00 +0200 CEST | VALUE: true
+	// [5] TIME: 2020-04-30 00:00:00 +0200 CEST | VALUE: true
+	// [6] TIME: 2020-05-01 00:00:00 +0200 CEST | VALUE: false
+	// [7] TIME: 2020-05-02 00:00:00 +0200 CEST | VALUE: false
+	// [8] TIME: 2020-05-02 15:00:00 +0200 CEST | VALUE: true
+	// [9] TIME: 2020-05-02 18:00:00 +0200 CEST | VALUE: false
+	// [10] TIME: 2020-05-03 00:00:00 +0200 CEST | VALUE: false
+	// [11] TIME: 2020-05-04 00:00:00 +0200 CEST | VALUE: true
+	// [12] TIME: 2020-05-04 03:00:00 +0200 CEST | VALUE: false
+	// [13] TIME: 2020-05-04 05:00:00 +0200 CEST | VALUE: true
+	// [14] TIME: 2020-05-05 00:00:00 +0200 CEST | VALUE: true
 }

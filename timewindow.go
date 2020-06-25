@@ -12,6 +12,7 @@ type AddSlotMode int
 const (
 	Add    AddSlotMode = 0
 	Remove AddSlotMode = 1
+	And    AddSlotMode = 2
 )
 
 type TimeWindow struct {
@@ -109,6 +110,11 @@ func (tw *TimeWindow) GetTimeEvents(start, end time.Time) (*USTimeSerie, error) 
 		switch tw.SlotMode[k] {
 		case Add:
 			ret, err = ret.Or(slotEvents)
+			if err != nil {
+				return ret, fmt.Errorf("Error on Window [%s] can not Add slot  %d/[%s] : Err: %s", tw.ID, k, v.ID, err)
+			}
+		case And:
+			ret, err = ret.And(slotEvents)
 			if err != nil {
 				return ret, fmt.Errorf("Error on Window [%s] can not Add slot  %d/[%s] : Err: %s", tw.ID, k, v.ID, err)
 			}
