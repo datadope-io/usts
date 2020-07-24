@@ -14,8 +14,8 @@ type TimeSlot struct {
 	ID string
 
 	//-------------------------------------
-	scf string        //Start Cron Format
-	ecf string        //End Cron Format
+	Scf string        //Start Cron Format
+	Ecf string        //End Cron Format
 	scs cron.Schedule //Start Cron Schedule
 	ecs cron.Schedule //End Cron Schedule
 }
@@ -27,16 +27,16 @@ func NewTimeSlot(id, startexpr, endexpr string) (*TimeSlot, error) {
 
 	ret := &TimeSlot{}
 	ret.ID = id
-	ret.scf = startexpr
-	ret.ecf = endexpr
+	ret.Scf = startexpr
+	ret.Ecf = endexpr
 
 	//START
-	ret.scs, err = crparser.Parse(ret.scf)
+	ret.scs, err = crparser.Parse(ret.Scf)
 	if err != nil {
 		return nil, fmt.Errorf("ERROR on parse Start cron expression : %s", err)
 	}
 	//END
-	ret.ecs, err = crparser.Parse(ret.ecf)
+	ret.ecs, err = crparser.Parse(ret.Ecf)
 	if err != nil {
 		return nil, fmt.Errorf("ERROR on parse End cron expression : %s", err)
 	}
@@ -48,12 +48,12 @@ func NewTimeSlot(id, startexpr, endexpr string) (*TimeSlot, error) {
 func (ts *TimeSlot) RefreshCronTZ(tz string) error {
 	var err error
 
-	cronTplStart := ts.scf
-	cronTplEnd := ts.ecf
+	cronTplStart := ts.Scf
+	cronTplEnd := ts.Ecf
 
 	if len(tz) > 0 {
-		cronTplStart = "CRON_TZ=" + tz + " " + ts.scf
-		cronTplEnd = "CRON_TZ=" + tz + " " + ts.ecf
+		cronTplStart = "CRON_TZ=" + tz + " " + ts.Scf
+		cronTplEnd = "CRON_TZ=" + tz + " " + ts.Ecf
 	}
 
 	//START
@@ -105,9 +105,9 @@ func GetPreviousCronTime(sch cron.Schedule, start time.Time) time.Time {
 func (ts *TimeSlot) GetClosestPreviousEvent(start time.Time) (time.Time, bool) {
 
 	tStart := GetPreviousCronTime(ts.scs, start)
-	ilog.Debugf(">>>>USTS DEBUG [TimeSlot:GetClosestPreviousEvent]: from Start Expression [%s] got on time [%s]", ts.scf, tStart)
+	ilog.Debugf(">>>>USTS DEBUG [TimeSlot:GetClosestPreviousEvent]: from Start Expression [%s] got on time [%s]", ts.Scf, tStart)
 	tEnd := GetPreviousCronTime(ts.ecs, start)
-	ilog.Debugf(">>>>USTS DEBUG [TimeSlot:GetClosestPreviousEvent]: from End Expression [%s] got on time [%s]", ts.ecf, tEnd)
+	ilog.Debugf(">>>>USTS DEBUG [TimeSlot:GetClosestPreviousEvent]: from End Expression [%s] got on time [%s]", ts.Ecf, tEnd)
 	switch {
 	case tStart.After(tEnd):
 		ilog.Debugf(">>>>USTS DEBUG [TimeSlot:GetClosestPreviousEvent]: Start after end => (start expr wins)TRUE")
