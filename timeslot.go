@@ -147,7 +147,7 @@ func (ts *TimeSlot) GetTimeEvents(start, end time.Time, tz string) (*USTimeSerie
 		tok.Add(t, true)
 		tnext = t
 	}
-	tnext = start
+	tnext = start.Add(-1 * time.Second)
 	for {
 		t := ts.ecs.Next(tnext)
 		if t.After(end) {
@@ -157,8 +157,16 @@ func (ts *TimeSlot) GetTimeEvents(start, end time.Time, tz string) (*USTimeSerie
 		tnext = t
 	}
 	tret, err := tok.Combine(tnok)
-	tinit, state := ts.GetClosestPreviousEvent(start)
-	ilog.Debugf(">>>>USTS DEBUG[TimeSlot:GetTimeEvents] Set default value for t = %s in %t", tinit, state)
-	tret.SetDefault(state)
+	//if start has a value
+
+	if v, ok := tret.GetExact(start); ok {
+		ilog.Debugf(">>>>USTS DEBUG [TimeSlot:GetTimeEvents] Set default value for t = %s in %t", start, v)
+		tret.SetDefault(v)
+	} else {
+		tinit, state := ts.GetClosestPreviousEvent(start)
+		ilog.Debugf(">>>>USTS DEBUG [TimeSlot:GetTimeEvents] Set default value for t = %s in %t", tinit, state)
+		tret.SetDefault(state)
+	}
+
 	return tret, err
 }

@@ -1,3 +1,8 @@
+# v0.1.4 (2020/07/25)
+
+* fixed timeevents when start or end time matches a timeslot End Event.
+* Added timeslot and timewindow tests
+
 # v0.1.3 (2020/07/24)
 
 * Removed duplicated tests

@@ -101,6 +101,7 @@ func (tw *TimeWindow) GetTimeEvents(start, end time.Time) (*USTimeSerie, error) 
 	// for each slot add/remove slots from
 
 	for k, v := range tw.Slots {
+		ilog.Debugf(">>>>USTS DEBUG [TimeWindow:GetTimeEvents] Compute events for timeslot = %s / mode %d", v.ID, tw.SlotMode[k])
 		slotEvents, err := v.GetTimeEvents(start, end, tw.timeZone)
 		if err != nil {
 			return ret, fmt.Errorf("Error on get time events for slot %d/%s", k, v.ID)
