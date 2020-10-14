@@ -1,6 +1,7 @@
 package usts
 
 import (
+	"bytes"
 	"fmt"
 	"time"
 )
@@ -299,6 +300,21 @@ func (uts *USTimeSerie) Dump() {
 		v := uts.m[k]
 		fmt.Printf("[%d] TIME: %s | VALUE: %v\n", i, k, v)
 	}
+}
+
+// DumpBufferWithPrefix Prints detailed info on the time series in stdout
+func (uts *USTimeSerie) DumpBufferWithPrefix(prefix string) bytes.Buffer {
+	var buffer bytes.Buffer
+
+	init := fmt.Sprintf(" %s [INIT] Default VALUE: %v\n", prefix, uts.defVal)
+	buffer.WriteString(init)
+	for i := 0; i < len(uts.t); i++ {
+		k := uts.t[i]
+		v := uts.m[k]
+		l := fmt.Sprintf("%s [%d] TIME: %s | VALUE: %v\n", prefix, i, k, v)
+		buffer.WriteString(l)
+	}
+	return buffer
 }
 
 // DumpInTimezone Prints detailed info on the time serie on certain Timezone

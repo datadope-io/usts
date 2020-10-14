@@ -1,3 +1,7 @@
+# v0.1.5 (2020/10/14)
+
+* added DumpBufferWithPrefix function
+
 # v0.1.4 (2020/07/25)
 
 * fixed timeevents when start or end time matches a timeslot End Event.

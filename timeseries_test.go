@@ -1,8 +1,11 @@
 package usts
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"math/rand"
+	"strings"
 	"testing"
 	"time"
 )
@@ -189,6 +192,40 @@ func TestCompact(t *testing.T) {
 	if len != 9 {
 		t.Errorf("Compact  Len Got %d  want 9", len)
 	}
+}
+
+func ExampleDumpBuffer() {
+	ts := NewUSTimeSerie(0)
+
+	ts.Add(time.Date(1995, 1, 1, 0, 0, 0, 0, time.UTC), "1995")
+	ts.Add(time.Date(1980, 1, 1, 0, 0, 0, 0, time.UTC), "1980")
+	ts.Add(time.Date(1985, 1, 1, 0, 0, 0, 0, time.UTC), "1985")
+	ts.Add(time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC), "1990")
+	buf := ts.DumpBufferWithPrefix("prefix")
+
+	reader := bufio.NewReader(&buf)
+	var line string
+	var err error
+	for {
+		line, err = reader.ReadString('\n')
+		if err != nil && err != io.EOF {
+			break
+		}
+
+		// Process the line here.
+		fmt.Printf("%s\n", strings.TrimSpace(line))
+		if err != nil {
+			break
+		}
+	}
+
+	// Output:
+	//prefix [INIT] Default VALUE: <nil>
+	//prefix [0] TIME: 1980-01-01 00:00:00 +0000 UTC | VALUE: 1980
+	//prefix [1] TIME: 1985-01-01 00:00:00 +0000 UTC | VALUE: 1985
+	//prefix [2] TIME: 1990-01-01 00:00:00 +0000 UTC | VALUE: 1990
+	//prefix [3] TIME: 1995-01-01 00:00:00 +0000 UTC | VALUE: 1995
+
 }
 
 func ExampleAdd() {
