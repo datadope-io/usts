@@ -1,3 +1,8 @@
+# v0.1.6 (2021/03/26)
+
+* added new MarkPeriods function to merge periods into new UTS
+* fixed distribution when the mask has more defined events than base UTS
+
 # v0.1.5 (2020/10/14)
 
 * added DumpBufferWithPrefix function

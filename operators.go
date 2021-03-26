@@ -122,6 +122,35 @@ func (uts *USTimeSerie) And(other *USTimeSerie) (*USTimeSerie, error) {
 	return res, nil
 }
 
+// Mark periods on this TimeSerie with the other TimeSerie the resulting
+// TimeSerie will have the same time points of this TimeSeries (max will be N+M if any repeated time)
+// with all available periods of this TimeSerie and the other TimeSerie (max will be N+M periods)
+// marking periods: this is `output[t] = x[t1..tM]` with M all available time periods combinations,
+// if x[tx] has no value, it will retrieve the previous
+func (uts *USTimeSerie) MarkPeriods(other *USTimeSerie) (*USTimeSerie, error) {
+
+	var res *USTimeSerie
+
+	if uts.Len() == 0 {
+		res = NewUSTimeSerie(0)
+		res.SetDefault(uts.defVal)
+		return res, nil
+	}
+
+	combined := unique(keyCombineOrdered(uts.Keys(), other.Keys()))
+
+	res = NewUSTimeSerie(len(combined))
+	res.SetDefault(uts.defVal)
+
+	for _, t := range combined {
+		v1, _ := uts.Get(t)
+		ilog.Debugf(">>>>USTS DEBUG [USTimeSerie:MarkPeriods]:marking periods with value for time %s [ %+v ]", t, v1)
+		result := v1
+		res.Add(t, result)
+	}
+	return res, nil
+}
+
 // Or Logical OR from this TimeSerie with the other TimeSerie the resulting
 // TimeSerie will have the same time points in both previous series (max will be N+M if any repeated time)
 // computing logical OR : this is `output[t] = x[t1] OR y[t1]` if no value in y[t1] it gets the previous value

@@ -238,3 +238,234 @@ func ExampleDistribution2() {
 	// VALUE false present for 30m0s :  50.00 %
 	// VALUE true present for 30m0s :  50.00 %
 }
+
+func ExampleDistribution3() {
+	var err error
+	var t0, t1 time.Time
+	var total time.Duration
+	var totalsec int64
+	var m map[interface{}]time.Duration
+
+	ts := NewUSTimeSerie(0)
+
+	ts.Add(time.Date(2020, 6, 25, 14, 30, 0, 0, time.UTC), false)
+	ts.Add(time.Date(2020, 6, 25, 14, 45, 0, 0, time.UTC), true)
+
+	// TS - UTS with base line as true
+	// |_______________| 15m
+
+	t0 = time.Date(2020, 6, 25, 14, 0, 0, 0, time.UTC)
+	t1 = time.Date(2020, 6, 25, 15, 0, 0, 0, time.UTC)
+
+	// EXPECTED DISTRIBUTION
+	// t0 = 14:00-14:15 | ???	|
+	// t2 = 14:15-14:30 | False	|
+	// t3 = 14:30-15:00 | True  |
+	// |  t1  			* t2 *               t3     |
+	// |  ???????????? |_______|--------------------| - 1h
+	// |  ???????????? |_______|--------------------| - 1h
+
+	m, total, err = ts.Distribution(t0, t1, nil)
+	if err != nil {
+		fmt.Errorf("Error: %s", err)
+		return
+	}
+	totalsec = int64(total / time.Second)
+
+	for k, v := range m {
+		percent := float64(v/time.Second) * 100.0 / float64(totalsec)
+		fmt.Printf("VALUE %v present for %s :  %.2f %%\n", k, v, percent)
+	}
+
+	// Unordered output:
+	// VALUE true present for 15m0s :  25.00 %
+	// VALUE <nil> present for 30m0s :  50.00 %
+	// VALUE false present for 15m0s :  25.00 %
+}
+
+func ExampleDistribution_BASE() {
+	var err error
+	var t0, t1 time.Time
+	var total time.Duration
+	var totalsec int64
+	var m map[interface{}]time.Duration
+
+	// TS - UTS with base line as true
+	// |--------------------------------------------| - 1h
+
+	ts := NewUSTimeSerie(0)
+	ts.SetDefault(true)
+
+	t0 = time.Date(2021, 03, 24, 14, 00, 0, 0, time.UTC)
+	t1 = time.Date(2021, 03, 24, 15, 00, 0, 0, time.UTC)
+
+	m, total, err = ts.Distribution(t0, t1, nil)
+	if err != nil {
+		fmt.Errorf("Error: %s", err)
+		return
+	}
+	totalsec = int64(total / time.Second)
+
+	for k, v := range m {
+		percent := float64(v/time.Second) * 100.0 / float64(totalsec)
+		fmt.Printf("VALUE %v present for %s :  %.2f %%\n", k, v, percent)
+	}
+
+	// Unordered output:
+	// VALUE true present for 1h0m0s :  100.00 %
+}
+
+func ExampleDistribution_ConstUTS_Mask() {
+	var err error
+	var t0, t1 time.Time
+	var total time.Duration
+	var totalsec int64
+	var m map[interface{}]time.Duration
+
+	// TS - UTS with base line as true
+	// |--------------------------------------------| - 1h
+
+	ts := NewUSTimeSerie(0)
+	ts.SetDefault(true)
+
+	// MASK - UTS with false values on an specific interval
+	// |------_____---------------------------------| - 1h
+
+	tm0 := time.Date(2021, 03, 24, 14, 05, 0, 0, time.UTC)
+	tm1 := time.Date(2021, 03, 24, 14, 10, 0, 0, time.UTC)
+	mask := NewUSTimeSerie(0)
+	mask.SetDefault(true)
+	mask.SetIntervalValue(tm0, tm1, false)
+
+	// EXPECTED DISTRIBUTION
+	// t1 = 14:00-14:05 | True	|
+	// t2 = 14:05-14:10 | True	| X (Masked)
+	// t3 = 14:10-15:00 | True  |
+	// |  t1  * t2 *               t3               |
+	// |------|----|--------------------------------| - 1h
+	// |------|    |--------------------------------| - 55m
+
+	t0 = time.Date(2021, 03, 24, 14, 00, 0, 0, time.UTC)
+	t1 = time.Date(2021, 03, 24, 15, 00, 0, 0, time.UTC)
+
+	m, total, err = ts.Distribution(t0, t1, mask)
+	if err != nil {
+		fmt.Errorf("Error: %s", err)
+		return
+	}
+	totalsec = int64(total / time.Second)
+
+	for k, v := range m {
+		percent := float64(v/time.Second) * 100.0 / float64(totalsec)
+		fmt.Printf("VALUE %v present for %s :  %.2f %%\n", k, v, percent)
+	}
+
+	// Unordered output:
+	// VALUE true present for 55m0s :  100.00 %
+}
+
+func ExampleDistribution_ConstUTS_FullNOTMask() {
+	var err error
+	var t0, t1 time.Time
+	var total time.Duration
+	var totalsec int64
+	var m map[interface{}]time.Duration
+
+	// TS - UTS with base line as true
+	// |--------------------------------------------| - 1h
+
+	ts := NewUSTimeSerie(0)
+	ts.SetDefault(true)
+
+	// MASK - UTS with false values on an specific interval
+	// |____________________________________________| - 1h
+
+	tm0 := time.Date(2021, 03, 24, 14, 05, 0, 0, time.UTC)
+	tm1 := time.Date(2021, 03, 24, 14, 10, 0, 0, time.UTC)
+	mask := NewUSTimeSerie(0)
+	mask.SetDefault(false)
+	mask.SetIntervalValue(tm0, tm1, false)
+
+	// EXPECTED DISTRIBUTION
+	// t1 = 14:00-14:05 | True	|
+	// t2 = 14:05-14:10 | True	| X (Masked)
+	// t3 = 14:10-15:00 | True  |
+	// |  t1  * t2 *               t3               |
+	// |------|----|--------------------------------| - 1h
+	// |____________________________________________| - 0
+
+	t0 = time.Date(2021, 03, 24, 14, 00, 0, 0, time.UTC)
+	t1 = time.Date(2021, 03, 24, 15, 00, 0, 0, time.UTC)
+
+	m, total, err = ts.Distribution(t0, t1, mask)
+	if err != nil {
+		fmt.Errorf("Error: %s", err)
+		return
+	}
+	totalsec = int64(total / time.Second)
+
+	for k, v := range m {
+		percent := float64(v/time.Second) * 100.0 / float64(totalsec)
+		fmt.Printf("VALUE %v present for %s :  %.2f %%\n", k, v, percent)
+	}
+
+	// Unordered output:
+
+}
+
+func ExampleDistribution_EventsUTS_Mask() {
+	var err error
+	var t0, t1 time.Time
+	var total time.Duration
+	var totalsec int64
+	var m map[interface{}]time.Duration
+
+	// TS - UTS with events
+	// |--______-------------______-----------------| - 1h
+
+	ts := NewUSTimeSerie(0)
+	ts.SetDefault(true)
+	// Add values to default
+	ts.Add(time.Date(2021, 03, 24, 14, 05, 0, 0, time.UTC), false)
+	ts.Add(time.Date(2021, 03, 24, 14, 15, 0, 0, time.UTC), true)
+	ts.Add(time.Date(2021, 03, 24, 14, 30, 0, 0, time.UTC), false)
+
+	// MASK - UTS with false values on an specific interval
+	// |----_______---------------------------------| - 1h
+
+	tm0 := time.Date(2021, 03, 24, 14, 10, 0, 0, time.UTC)
+	tm1 := time.Date(2021, 03, 24, 14, 20, 0, 0, time.UTC)
+	mask := NewUSTimeSerie(0)
+	mask.SetDefault(true)
+	mask.SetIntervalValue(tm0, tm1, false)
+
+	// EXPECTED DISTRIBUTION
+	// t1 = 14:00-14:05 | True	|
+	// t2 = 14:05-14:10 | False	|
+	// t3 = 14:10-14:15 | False | X (Masked)
+	// t4 = 14:15-14:20 | True 	| X (Masked)
+	// t5 = 14:20-14:30 | True	|
+	// t6 = 14:30-15:00 | False |
+	// |t1*t2*t3*t4*     t5    *        t6          |
+	// |--___|__---|------------____________________| - 1h
+	// |--___|     |------------____________________| - 50m
+
+	t0 = time.Date(2021, 03, 24, 14, 00, 0, 0, time.UTC)
+	t1 = time.Date(2021, 03, 24, 15, 00, 0, 0, time.UTC)
+
+	m, total, err = ts.Distribution(t0, t1, mask)
+	if err != nil {
+		fmt.Errorf("Error: %s", err)
+		return
+	}
+	totalsec = int64(total / time.Second)
+
+	for k, v := range m {
+		percent := float64(v/time.Second) * 100.0 / float64(totalsec)
+		fmt.Printf("VALUE %v present for %s :  %.2f %%\n", k, v, percent)
+	}
+
+	// Unordered output:
+	// VALUE true present for 15m0s :  30.00 %
+	// VALUE false present for 35m0s :  70.00 %
+}
