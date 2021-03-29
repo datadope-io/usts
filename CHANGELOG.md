@@ -1,3 +1,7 @@
+# v0.1.7 (2021/03/29)
+
+* fixed usts index getter when the events are outside the using timeref period (start/end)
+
 # v0.1.6 (2021/03/26)
 
 * added new MarkPeriods function to merge periods into new UTS

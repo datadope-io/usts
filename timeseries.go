@@ -163,6 +163,7 @@ func (uts *USTimeSerie) getLeftRightIndexInsidePeriod(start, end time.Time) (int
 	ilog.Debugf(">>>>USTS DEBUG [USTimeSerie:getLeftRightIndexInsidePeriod]:>>>>START ---> %d\n", s)
 	//End
 	t = end
+	bf := false
 	for k, v := range uts.t {
 		ilog.Tracef(">>>>USTS TRACE [USTimeSerie:getLeftRightIndexInsidePeriod]: END[%d]-----[%s]------->[%s]\n", k, t, v)
 		if t.Equal(v) {
@@ -171,10 +172,19 @@ func (uts *USTimeSerie) getLeftRightIndexInsidePeriod(start, end time.Time) (int
 		}
 		if t.Before(v) {
 			e = k - 1
+			bf = true
 			break
 		}
 	}
 	ilog.Tracef(">>>>USTS TRACE [USTimeSerie:getLeftRightIndexInsidePeriod]: S[%d] E[%d]\n", s, e)
+
+	// if the end is the first index, means that no period is equal or before than the provided t
+	// in this case, a single event is xpected on s/e
+	// TODO: review if it fits all the cases
+	if e == 0 && !bf {
+		e = len(uts.t) - 1
+	}
+
 	//TODO: this condition is not always true... should be reviewed
 	if e < s && s-e == 1 {
 		//complete period inside 2 consecutive points
@@ -182,9 +192,7 @@ func (uts *USTimeSerie) getLeftRightIndexInsidePeriod(start, end time.Time) (int
 		ilog.Tracef(">>>>USTS TRACE [USTimeSerie:getLeftRightIndexInsidePeriod]: Swapping Start/End values now START %d and END %d\n", e, s)
 		return e, s, fmt.Errorf("Period inside two consecutive points")
 	}
-	if e == 0 {
-		e = len(uts.t) - 1
-	}
+
 	ilog.Debugf(">>>>USTS DEBUG [USTimeSerie:getLeftRightIndexInsidePeriod]: START %d / END %d\n", s, e)
 	return s, e, nil
 }

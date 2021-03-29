@@ -356,6 +356,56 @@ func ExampleIterateNormal() {
 
 }
 
+func ExampleIterateNorma_SubEvents() {
+	ts := NewUSTimeSerie(0)
+	ts.SetInitialVal(false)
+
+	// Insert example records:
+	ts.Add(time.Date(2021, 03, 24, 16, 30, 0, 0, time.UTC), true)
+	ts.Add(time.Date(2021, 03, 24, 17, 30, 0, 0, time.UTC), false)
+
+	start := time.Date(2021, 03, 24, 17, 0, 0, 0, time.UTC)
+	end := time.Date(2021, 03, 24, 18, 0, 0, 0, time.UTC)
+
+	//end := time.Now()
+
+	err := ts.Iterate(false, start, end, func(t time.Time, val interface{}, i int) bool {
+		fmt.Printf("[%d] TIME: %s : VALUE %v\n", i, t, val)
+		return true
+	})
+	if err != nil {
+		fmt.Printf("Error : %s", err)
+	}
+	// Output:
+	// [1] TIME: 2021-03-24 17:30:00 +0000 UTC : VALUE false
+
+}
+
+func ExampleIterateNorma_SupEvents() {
+	ts := NewUSTimeSerie(0)
+	ts.SetInitialVal(false)
+
+	// Insert example records:
+	ts.Add(time.Date(2021, 03, 24, 17, 30, 0, 0, time.UTC), false)
+	ts.Add(time.Date(2021, 03, 24, 18, 30, 0, 0, time.UTC), true)
+
+	start := time.Date(2021, 03, 24, 17, 0, 0, 0, time.UTC)
+	end := time.Date(2021, 03, 24, 18, 0, 0, 0, time.UTC)
+
+	//end := time.Now()
+
+	err := ts.Iterate(false, start, end, func(t time.Time, val interface{}, i int) bool {
+		fmt.Printf("[%d] TIME: %s : VALUE %v\n", i, t, val)
+		return true
+	})
+	if err != nil {
+		fmt.Printf("Error : %s", err)
+	}
+	// Output:
+	// [0] TIME: 2021-03-24 17:30:00 +0000 UTC : VALUE false
+
+}
+
 func ExampleIterateReverse() {
 	ts := NewUSTimeSerie(0)
 
