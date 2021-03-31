@@ -412,6 +412,88 @@ func (uts *USTimeSerie) Compact() (bool, int) {
 	return false, 0
 }
 
+// CompactExtend removes all repeated values maintaining only those who changes,
+// it returs true and the number of reduced elements if could be compacted
+// false and 0 if not. The time boundaries on repeated values are chosen based
+// on time values - true:min, false: max. This function only works with
+// USTS with boolean values
+func (uts *USTimeSerie) CompactBoundaries(reversed bool) (bool, int) {
+
+	var lastval interface{}
+
+	validkeysF := []int{}
+	validkeysR := []int{}
+	lastval = uts.defVal
+	// Retrieve the first match for each value
+	for k, v := range uts.t {
+		if lastval != uts.m[v] {
+			validkeysF = append(validkeysF, k)
+			lastval = uts.m[v]
+		}
+	}
+	if len(uts.t) == 0 {
+		return false, 0
+	}
+
+	lvi := uts.t[len(uts.t)-1]
+	lastval = uts.m[lvi]
+
+	// Retrieve the last match for each value
+	r := len(uts.t) - 1
+	for i := r; i >= 0; i-- {
+		if i == r {
+			validkeysR = append(validkeysR, i)
+		}
+		if lastval != uts.m[uts.t[i]] {
+			validkeysR = append(validkeysR, i)
+			lastval = uts.m[uts.t[i]]
+		}
+	}
+
+	// Reverse validKeysR to iterate over couple of values
+	for i, j := 0, len(validkeysR)-1; i < j; i, j = i+1, j-1 {
+		validkeysR[i], validkeysR[j] = validkeysR[j], validkeysR[i]
+	}
+
+	// The result of F and R should have the same len, as it has the same number of changes
+	// Based on the value, we can choose the different index in order to retrieve the:
+	//	- min, in case of true
+	//	- max in case of false
+
+	validkeys := []int{}
+	for k, v := range validkeysF {
+		// if the value is true, based on trueVal
+		if uts.m[uts.t[v]].(bool) == !reversed {
+			// retrieve the minimum value of each one
+			validkeys = append(validkeys, v)
+			continue
+		}
+		validkeys = append(validkeys, validkeysR[k])
+	}
+
+	newlen := len(validkeys)
+	reduced := uts.Len() - newlen
+	if reduced > 0 {
+		newmap := make(map[time.Time]interface{}, newlen)
+		newarray := make([]time.Time, newlen)
+		index := 0
+		for _, validkey := range validkeys {
+			t := uts.t[validkey]
+			val := uts.m[t]
+			newarray[index] = t
+			newmap[t] = val
+			index++
+		}
+		for k := range uts.m {
+			delete(uts.m, k)
+		}
+		uts.m = newmap
+		uts.t = newarray
+		return true, reduced
+	}
+	return false, 0
+}
+
 // IteratePeriodFunc function helper to iterate over periods instead of iteration over elements
 // the initial time t0 and end time t1 of the period will be sent to the funcion , also the value
 // at this interval
