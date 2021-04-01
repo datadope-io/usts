@@ -1,3 +1,7 @@
+# v0.1.8 (2021/03/31)
+
+* added CompactBoundaries function to retrieve min/max boundaries of repeated events on USTs
+
 # v0.1.7 (2021/03/29)
 
 * fixed usts index getter when the events are outside the using timeref period (start/end)

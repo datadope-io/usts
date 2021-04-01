@@ -194,6 +194,113 @@ func TestCompact(t *testing.T) {
 	}
 }
 
+func ExampleCompactBoundariesBoolUSTS() {
+	var ok bool
+	var num int
+
+	ts := NewUSTimeSerie(0)
+
+	ts.Add(time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC), false) // 0
+	ts.Add(time.Date(2001, 1, 1, 0, 0, 0, 0, time.UTC), false) // 0
+	ts.Add(time.Date(2002, 1, 1, 0, 0, 0, 0, time.UTC), true)  // 1
+	ts.Add(time.Date(2003, 1, 1, 0, 0, 0, 0, time.UTC), true)  // 2
+	ts.Add(time.Date(2004, 1, 1, 0, 0, 0, 0, time.UTC), false) // 3
+	ts.Add(time.Date(2005, 1, 1, 0, 0, 0, 0, time.UTC), false) // 4
+	ts.Add(time.Date(2006, 1, 1, 0, 0, 0, 0, time.UTC), false) // 5
+	ts.Add(time.Date(2007, 1, 1, 0, 0, 0, 0, time.UTC), false) // 6
+	ts.Add(time.Date(2008, 1, 1, 0, 0, 0, 0, time.UTC), true)  // 7
+	ts.Add(time.Date(2009, 1, 1, 0, 0, 0, 0, time.UTC), true)  // 8
+	ts.Add(time.Date(2010, 1, 1, 0, 0, 0, 0, time.UTC), true)  // 9
+	ts.Add(time.Date(2011, 1, 1, 0, 0, 0, 0, time.UTC), false) // 10
+	ts.Add(time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC), false) // 11
+	ts.Add(time.Date(2013, 1, 1, 0, 0, 0, 0, time.UTC), false) // 12
+	ts.Add(time.Date(2014, 1, 1, 0, 0, 0, 0, time.UTC), true)  // 13
+	ts.Add(time.Date(2015, 1, 1, 0, 0, 0, 0, time.UTC), false) // 14
+
+	ok, num = ts.CompactBoundaries(false)
+	fmt.Printf("Encountered: %t , num: %d\n", ok, num)
+	ts.Dump()
+
+	// Output:
+	// Encountered: true , num: 9
+	// [INIT] Default VALUE: <nil>
+	// [0] TIME: 2001-01-01 00:00:00 +0000 UTC | VALUE: false
+	// [1] TIME: 2002-01-01 00:00:00 +0000 UTC | VALUE: true
+	// [2] TIME: 2007-01-01 00:00:00 +0000 UTC | VALUE: false
+	// [3] TIME: 2008-01-01 00:00:00 +0000 UTC | VALUE: true
+	// [4] TIME: 2013-01-01 00:00:00 +0000 UTC | VALUE: false
+	// [5] TIME: 2014-01-01 00:00:00 +0000 UTC | VALUE: true
+	// [6] TIME: 2015-01-01 00:00:00 +0000 UTC | VALUE: false
+
+}
+
+func ExampleCompactBoundariesBoolUSTS_MaskExternal() {
+	var ok bool
+	var num int
+
+	ts := NewUSTimeSerie(0)
+
+	// The fist mask is from 20 to 40
+	ts.Add(time.Date(2000, 1, 1, 10, 20, 0, 0, time.UTC), true)
+	ts.Add(time.Date(2000, 1, 1, 10, 40, 0, 0, time.UTC), false)
+
+	// The second mask is from 30 to 50
+	ts.Add(time.Date(2000, 1, 1, 10, 30, 0, 0, time.UTC), true)
+	ts.Add(time.Date(2000, 1, 1, 10, 50, 0, 0, time.UTC), false)
+
+	// As masks, we need to retrieve the maximum extension of it
+	//
+	// -------|________|------------------
+	// -----------|__________|------------
+
+	// Result with only 2 periods marked
+	// -------|______________|------------
+
+	ok, num = ts.CompactBoundaries(false)
+	fmt.Printf("Encountered: %t , num: %d\n", ok, num)
+	ts.Dump()
+
+	// Output:
+	// Encountered: true , num: 2
+	// [INIT] Default VALUE: <nil>
+	// [0] TIME: 2000-01-01 10:20:00 +0000 UTC | VALUE: true
+	// [1] TIME: 2000-01-01 10:50:00 +0000 UTC | VALUE: false
+
+}
+
+func ExampleCompactBoundariesBoolUSTS_MaskInternal() {
+	var ok bool
+	var num int
+
+	ts := NewUSTimeSerie(0)
+
+	// The fist mask is from 20 to 40
+	ts.Add(time.Date(2000, 1, 1, 10, 20, 0, 0, time.UTC), true)
+	ts.Add(time.Date(2000, 1, 1, 10, 40, 0, 0, time.UTC), false)
+
+	// The second mask is from 30 to 50
+	ts.Add(time.Date(2000, 1, 1, 10, 30, 0, 0, time.UTC), true)
+	ts.Add(time.Date(2000, 1, 1, 10, 50, 0, 0, time.UTC), false)
+
+	// As masks, we need to retrieve the minimum extension of it
+	//
+	// -------|________|------------------
+	// -----------|__________|------------
+
+	// Result with only 2 periods marked
+	// -----------|____|------------
+
+	ok, num = ts.CompactBoundaries(true)
+	fmt.Printf("Encountered: %t , num: %d\n", ok, num)
+	ts.Dump()
+
+	// Output:
+	// Encountered: true , num: 2
+	// [INIT] Default VALUE: <nil>
+	// [0] TIME: 2000-01-01 10:30:00 +0000 UTC | VALUE: true
+	// [1] TIME: 2000-01-01 10:40:00 +0000 UTC | VALUE: false
+}
+
 func ExampleDumpBuffer() {
 	ts := NewUSTimeSerie(0)
 
