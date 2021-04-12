@@ -71,11 +71,14 @@ func (ts *TimeSlot) RefreshCronTZ(tz string) error {
 
 // GetPreviousCronTime get Previous scheduled time from cron Scheduler
 // this method will check if exist any previous sched value beggining in the past
-// in order to avoid too expensive cost we will test iteratively with 1h,6h,24h,7d,30d,365d before
+// with different intervals 1ms,1s,1m,1h,6h,24h,7d,30d,365d before
 func GetPreviousCronTime(sch cron.Schedule, start time.Time) time.Time {
 
 	intervals := []time.Duration{
-		time.Hour,            //1h
+		1 * time.Millisecond, //1ms
+		1 * time.Second,      //1s
+		1 * time.Minute,      //1m
+		1 * time.Hour,        //1h
 		6 * time.Hour,        //6h
 		24 * time.Hour,       //24h
 		7 * 24 * time.Hour,   //7d
