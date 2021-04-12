@@ -1,3 +1,7 @@
+# v0.1.9 (2021/04/12)
+
+* fixed GetTimeEvents func when the events were less than 1h, now a precision of milliseconds is supported
+
 # v0.1.8 (2021/03/31)
 
 * added CompactBoundaries function to retrieve min/max boundaries of repeated events on USTs

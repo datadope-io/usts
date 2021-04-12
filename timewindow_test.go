@@ -309,3 +309,150 @@ func ExampleTimeWindow_6() {
 	//[INIT] Default VALUE: false
 	//[0] TIME: 2020-04-27 18:00:00 +0200 CEST | VALUE: false
 }
+
+func ExampleTimeWindow_7() {
+
+	var ts *USTimeSerie
+	var err error
+	var loc *time.Location
+	var slot *TimeSlot
+
+	win := NewTimeWindow("8x5")
+	loc, err = win.SetTimeZone("Europe/Madrid")
+	if err != nil {
+		fmt.Printf("ERROR on set timeZone %s\n", err)
+		return
+	}
+
+	slot, err = NewTimeSlot("8x5_a", "00 09 * * *", "00 14 * * *")
+	if err != nil {
+		fmt.Printf("ERROR on get slot 24x5 %s\n", err)
+		return
+	}
+	win.AddSlot(slot, Add)
+
+	slot, err = NewTimeSlot("8x5_b", "00 16 * * MON-FRI", "00 20 * * MON-FRI")
+	if err != nil {
+		fmt.Printf("ERROR on get slot  mon_6_to_8 %s\n", err)
+		return
+	}
+	win.AddSlot(slot, Add)
+
+	t0 := time.Date(2020, 4, 27, 14, 30, 0, 0, loc)
+	t1 := time.Date(2020, 4, 27, 14, 30, 0, 0, loc)
+
+	ts, err = win.GetTimeEvents(t0, t1)
+	if err != nil {
+		fmt.Printf("ERROR on set timewindow %s\n", err)
+		return
+	}
+	ts.DumpInTimezone("Europe/Madrid")
+	// Output:
+	//[INIT] Default VALUE: false
+}
+
+func ExampleTimeWindow_8() {
+
+	var ts *USTimeSerie
+	var err error
+	var loc *time.Location
+	var slot *TimeSlot
+
+	win := NewTimeWindow("8x5")
+	loc, err = win.SetTimeZone("Europe/Madrid")
+	if err != nil {
+		fmt.Printf("ERROR on set timeZone %s\n", err)
+		return
+	}
+
+	slot, err = NewTimeSlot("8x5_a", "00 09 * * *", "00 14 * * *")
+	if err != nil {
+		fmt.Printf("ERROR on get slot 24x5 %s\n", err)
+		return
+	}
+	win.AddSlot(slot, Add)
+
+	slot, err = NewTimeSlot("8x5_b", "00 16 * * MON-FRI", "00 20 * * MON-FRI")
+	if err != nil {
+		fmt.Printf("ERROR on get slot  mon_6_to_8 %s\n", err)
+		return
+	}
+	win.AddSlot(slot, Add)
+
+	t0 := time.Date(2020, 4, 27, 15, 05, 0, 0, loc)
+	t1 := time.Date(2020, 4, 27, 15, 15, 0, 0, loc)
+
+	ts, err = win.GetTimeEvents(t0, t1)
+	if err != nil {
+		fmt.Printf("ERROR on set timewindow %s\n", err)
+		return
+	}
+	ts.DumpInTimezone("Europe/Madrid")
+	// Output:
+	//[INIT] Default VALUE: false
+}
+
+func ExampleTimeWindow_9() {
+
+	var ts *USTimeSerie
+	var err error
+	var loc *time.Location
+	var slot *TimeSlot
+
+	win := NewTimeWindow("8x5")
+	loc, err = win.SetTimeZone("Europe/Madrid")
+	if err != nil {
+		fmt.Printf("ERROR on set timeZone %s\n", err)
+		return
+	}
+
+	slot, err = NewTimeSlot("8x5_a", "15 09 * * *", "30 14 * * *")
+	if err != nil {
+		fmt.Printf("ERROR on get slot 24x5 %s\n", err)
+		return
+	}
+	win.AddSlot(slot, Add)
+
+	slot, err = NewTimeSlot("8x5_b", "20 16 * * MON-FRI", "40 20 * * MON-FRI")
+	if err != nil {
+		fmt.Printf("ERROR on get slot  mon_6_to_8 %s\n", err)
+		return
+	}
+	win.AddSlot(slot, Add)
+
+	t0 := time.Date(2020, 4, 27, 9, 14, 59, 0, loc)
+	t1 := time.Date(2020, 4, 27, 9, 14, 59, 0, loc)
+
+	ts, err = win.GetTimeEvents(t0, t1)
+	if err != nil {
+		fmt.Printf("ERROR on set timewindow %s\n", err)
+		return
+	}
+	ts.DumpInTimezone("Europe/Madrid")
+
+	t0 = time.Date(2020, 4, 27, 9, 15, 0, 0, loc)
+	t1 = time.Date(2020, 4, 27, 9, 15, 0, 0, loc)
+
+	ts, err = win.GetTimeEvents(t0, t1)
+	if err != nil {
+		fmt.Printf("ERROR on set timewindow %s\n", err)
+		return
+	}
+	ts.DumpInTimezone("Europe/Madrid")
+
+	t0 = time.Date(2020, 4, 27, 9, 15, 1, 0, loc)
+	t1 = time.Date(2020, 4, 27, 9, 15, 1, 0, loc)
+
+	ts, err = win.GetTimeEvents(t0, t1)
+	if err != nil {
+		fmt.Printf("ERROR on set timewindow %s\n", err)
+		return
+	}
+	ts.DumpInTimezone("Europe/Madrid")
+
+	// Output:
+	// [INIT] Default VALUE: false
+	// [INIT] Default VALUE: true
+	// [0] TIME: 2020-04-27 09:15:00 +0200 CEST | VALUE: true
+	// [INIT] Default VALUE: true
+}
